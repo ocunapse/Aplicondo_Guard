@@ -1,42 +1,55 @@
 package com.ocunapse.aplicondo.guard;
 
+import android.content.Intent;
 import android.os.Bundle;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
+
 import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-import androidx.appcompat.widget.Toolbar;
-import androidx.appcompat.app.AppCompatActivity;
 
-import com.ocunapse.aplicondo.guard.databinding.ActivityLoginBinding;
+import com.ocunapse.aplicondo.guard.databinding.ActivityMainBinding;
+
+import java.io.IOException;
+
+import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okio.BufferedSink;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private ActivityLoginBinding binding;
+    private AppBarConfiguration appBarConfiguration;
+    private ActivityMainBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = ActivityLoginBinding.inflate(getLayoutInflater());
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        Toolbar myToolbar = (Toolbar) binding.myToolbar;
-        setSupportActionBar(myToolbar);
-
-        BottomNavigationView navView = findViewById(R.id.nav_view);
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications)
+        OkHttpClient client = new OkHttpClient();
+        RequestBody formBody = new FormBody.Builder()
+                .add("userId", binding.loginUsername.getText().toString())
+                .add("password", "bf9a36f1d8bc732a2d5a5925733b63d3")
                 .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-        NavigationUI.setupWithNavController(binding.navView, navController);
+        Request request = new Request.Builder()
+                .post(formBody)
+                .url("https://aplicondo.ocunapse.com/api/login")
+                .build();
+
+        binding.loginButton.setOnClickListener(v -> {
+            //TODO: http call
+            //Response response = client.newCall(request).execute();
+
+            Intent i = new Intent(LoginActivity.this, HomeActivity.class);
+            startActivity(i);
+        });
     }
 
 }
