@@ -2,8 +2,8 @@
     <!-- Base application theme. -->
     <style name="Theme.AplicondoGuard" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">#F44336</item>
-        <item name="colorPrimaryVariant">#F44336</item>
+        <item name="colorPrimary">@color/aplicondo_red</item>
+        <item name="colorPrimaryVariant">@color/aplicondo_red_secondary</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/teal_200</item>
@@ -11,6 +11,7 @@
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <item name="android:navigationBarColor">@color/aplicondo_red</item>
         <!-- Customize your theme here. -->
     </style>
     <!-- Base application theme. -->

@@ -2,6 +2,7 @@
     <string name="app_name">Aplicondo Guard</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
+    <string name="scan_btn">Scan Visitor QR</string>
     <string name="title_notifications">Notifications</string>
     <string name="title_activity_main">MainActivity</string>
     <!-- Strings used for fragments for navigation -->

@@ -11,17 +11,18 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.appcompat.widget.Toolbar;
 
+import com.ocunapse.aplicondo.guard.databinding.ActivityHomeBinding;
 import com.ocunapse.aplicondo.guard.databinding.ActivityLoginBinding;
 
 public class HomeActivity extends AppCompatActivity {
 
-    private ActivityLoginBinding binding;
+    private ActivityHomeBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = ActivityLoginBinding.inflate(getLayoutInflater());
+        binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         Toolbar myToolbar = (Toolbar) binding.myToolbar;

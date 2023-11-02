@@ -7,11 +7,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import androidx.navigation.ui.AppBarConfiguration;
 
-import com.ocunapse.aplicondo.guard.databinding.ActivityMainBinding;
+import com.google.android.material.snackbar.Snackbar;
+import com.ocunapse.aplicondo.guard.databinding.ActivityLoginBinding;
 
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -22,15 +24,14 @@ import okhttp3.Response;
 public class LoginActivity extends AppCompatActivity {
 
     private AppBarConfiguration appBarConfiguration;
-    private ActivityMainBinding binding;
+    private ActivityLoginBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
 
 
         binding.loginButton.setOnClickListener(v -> {
@@ -42,18 +43,20 @@ public class LoginActivity extends AppCompatActivity {
                     try {
                         final MediaType JSON = MediaType.get("application/json");
                         OkHttpClient client = new OkHttpClient();
-                        RequestBody formBody = RequestBody.create("{\"userId\":\""+uname+"\",\"password\":\""+md5(pwd).toLowerCase()+"\"}",JSON);
+                        RequestBody formBody = RequestBody.create("{\"userId\":\"" + uname + "\",\"password\":\"" + md5(pwd).toLowerCase() + "\"}", JSON);
                         Request request = new Request.Builder()
                                 .post(formBody)
                                 .url("https://aplicondo.ocunapse.com/api/login")
                                 .build();
-                        try{
+                        try {
                             Response response = client.newCall(request).execute();
                             System.out.println(response.body().string());
+//                            {"success":false,"error":{"message":"Invalid credentials","cause":"","code":1040}}
                             Intent i = new Intent(LoginActivity.this, HomeActivity.class);
                             startActivity(i);
-                        }catch ( IOException err){
-                            System.out.println("err = " + err);;
+                        } catch (IOException err) {
+                            System.out.println("err = " + err);
+                            Snackbar.make(binding.getRoot(),"FUck", Snackbar.LENGTH_LONG).show();
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
