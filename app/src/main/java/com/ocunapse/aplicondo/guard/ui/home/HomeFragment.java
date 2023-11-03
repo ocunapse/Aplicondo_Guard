@@ -1,27 +1,29 @@
 package com.ocunapse.aplicondo.guard.ui.home;
 
+import static com.ocunapse.aplicondo.guard.util.GeneralComponent.AlertBox;
+import static com.ocunapse.aplicondo.guard.util.StringUtil.hmacWithJava;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.mlkit.vision.barcode.common.Barcode;
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanner;
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions;
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning;
+import com.ocunapse.aplicondo.guard.R;
 import com.ocunapse.aplicondo.guard.databinding.FragmentHomeBinding;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
+import java.util.Objects;
 
 public class HomeFragment extends Fragment {
 
@@ -46,9 +48,24 @@ public class HomeFragment extends Fragment {
                     .build();
             GmsBarcodeScanner scanner = GmsBarcodeScanning.getClient(view.getContext(), options);
             scanner.startScan().addOnSuccessListener(barcode -> {
-                String val =  barcode.getRawValue();
-                String[] part = val.split(",(?=[^,]*$)");
-                System.out.println(part[1].trim());
+                try {
+                    String val = barcode.getRawValue();
+                    String[] part = val.split(",(?=[^,]*$)");
+                    String sig = part[1].trim();
+                    try {
+                        boolean isMatch = VerifyData(part[0].trim(), sig);
+                        String msg = "Sig : " + sig + " - The Signature is" + ( isMatch ? " " : " NOT ") + "match.";
+//                        AlertBox(getContext(), msg);
+                        AlertBox(getContext(), isMatch?"\uD83D\uDC4D":getString(R.string.invalid_qr_error));
+                    } catch (Exception e) {
+                        System.out.print(e.getMessage());
+                    }
+                }catch (Exception e){
+                    if(e instanceof ArrayIndexOutOfBoundsException){
+                        AlertBox(getContext(), getString(R.string.invalid_qr_error));
+                    }
+                    System.out.println(e);;
+                }
             });
         });
 
@@ -67,13 +84,25 @@ public class HomeFragment extends Fragment {
      ****/
 
 
-    private boolean VerifyData(String data, String signature) throws NoSuchAlgorithmException, InvalidKeyException {
+    private boolean VerifyData(String data, String signature) {
         boolean res = false;
         try {
-            String hmacSHA256Algorithm = "HmacSHA256";
+            res = VerifySignature(data,signature);
+        }catch (Exception e){
+            System.out.print(e.getMessage());
+        }
+        return res;
+    }
+
+    private boolean VerifySignature(String data, String signature) {
+        boolean res = false;
+        try {
+            String sha256 = "HmacSHA256";
             String key = "xV3483c#";
 
-            String result = hmacWithJava(hmacSHA256Algorithm, data, key);
+            String result = hmacWithJava(sha256, data, key);
+            System.out.println("sig : " + signature);
+//            Snackbar.make(requireView(),signature,Snackbar.LENGTH_LONG).show();
             if (result.equals(signature)) res = true;
         }catch (Exception e){
             System.out.print(e.getMessage());
@@ -81,19 +110,8 @@ public class HomeFragment extends Fragment {
         return res;
     }
 
-    public static String hmacWithJava(String algorithm, String data, String key)
-            throws NoSuchAlgorithmException, InvalidKeyException {
-        SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(), algorithm);
-        Mac mac = Mac.getInstance(algorithm);
-        mac.init(secretKeySpec);
-        return byteArrayToHex(mac.doFinal(data.getBytes()));
-    }
-    public static String byteArrayToHex(byte[] a) {
-        StringBuilder sb = new StringBuilder(a.length * 2);
-        for(byte b: a)
-            sb.append(String.format("%02x", b));
-        return sb.toString();
-    }
+
+
 
 
 }
