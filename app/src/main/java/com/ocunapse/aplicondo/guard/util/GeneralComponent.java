@@ -19,4 +19,8 @@ public class GeneralComponent {
         dlgAlert.setCancelable(true);
         dlgAlert.create().show();
     }
+
+    public static void ProgressBox(){
+
+    }
 }

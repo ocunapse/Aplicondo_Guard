@@ -2,8 +2,31 @@
 
     <style name="Theme.AplicondoGuard" parent="Base.Theme.AplicondoGuard">
         <!-- Transparent system bars for edge-to-edge. -->
-        <item name="android:navigationBarColor">@color/aplicondo_red</item>
+        <item name="android:navigationBarColor">@color/black</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
+
+        <!-- enable window content transitions -->
+        <item name="android:windowActivityTransitions">true</item>
+        <item name="android:windowAllowEnterTransitionOverlap">true</item>
+        <item name="android:windowAllowReturnTransitionOverlap">true</item>
+
+        <!-- specify enter and exit transitions -->
+        <item name="android:windowEnterTransition">@android:transition/fade</item>
+        <item name="android:windowExitTransition">@android:transition/fade</item>
+
+        <!-- specify shared element transitions -->
+        <item name="android:windowSharedElementEnterTransition">
+            @transition/change_image_transform</item>
+        <item name="android:windowSharedElementExitTransition">
+            @transition/change_image_transform</item>
+    </style>
+
+    <style name="Theme.AplicondoGuard.Fullscreen" parent="Theme.AplicondoGuard">
+        <item name="android:actionBarStyle">
+            @style/Widget.Theme.AplicondoGuard.ActionBar.Fullscreen
+        </item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:windowBackground">@null</item>
     </style>
 </resources>

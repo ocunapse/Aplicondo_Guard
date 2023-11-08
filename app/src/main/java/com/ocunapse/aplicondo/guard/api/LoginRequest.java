@@ -1,12 +1,14 @@
 package com.ocunapse.aplicondo.guard.api;
 
 
+import android.util.Log;
+
 public class LoginRequest extends RequestBase {
 
+    private static String prefix = "/login";
     LoginResult res;
     String usrname;
     String pswd;
-    int pinn;
 
     public LoginRequest(String username, String password, LoginResult res) {
         this.usrname = username;
@@ -14,27 +16,32 @@ public class LoginRequest extends RequestBase {
         this.res = res;
     }
 
-    class LoginReq{
-        String action   = Action;
-        String uname    = usrname;
-        String pwd      = pswd;
-        int pin         = pinn;
+     class LoginReq{
+        String userId    = usrname;
+        String password  = pswd;
     }
 
-    public class Login {
-        public String id;
-        public String name;
-        public String username;
 
+    public static class Sites { }
+
+    public static class Token {
+        public String accessToken;
+        public String refreshToken;
+    }
+
+    public static class User {
+        public int userId;
+        public String fullName;
+        public int siteId;
     }
 
     public static class LoginRes{
-        public APIerror error;
         public Boolean success;
-        public Login[] data;
+        public APIError error;
+        public Token tokens;
+        public User user;
+        public Sites[] sites;
     }
-
-
 
     @Override
     protected void onPostExecute(String s) {
@@ -47,15 +54,20 @@ public class LoginRequest extends RequestBase {
         }
         else {
             try {
+//                Log.i("get resp", s);
                 LoginRes rs = g.fromJson(s, LoginRes.class);
-                //if(rs.success)
-                    //ArenaApp.setUserLogin(rs.result);
+                if(rs.success){
+                    application.setSite(rs.user.siteId);
+                }
                 res.get(rs);
             }catch (Exception e){
+                Log.e("API error", e.getMessage());
                 LoginRes rs = new LoginRes();
                 rs.success = false;
+                rs.error = new APIError();
                 rs.error.code = 888;
-                rs.error.msg = s;
+                rs.error.message = "Parsing error";
+                rs.error.cause = e.getMessage();
                 res.get(rs);
             }
         }
@@ -65,7 +77,7 @@ public class LoginRequest extends RequestBase {
     @Override
     protected String doInBackground(Void... voids) {
         String data = g.toJson(new LoginReq());
-        return Request(data, server, CallType.POST);
+        return Request(data, server+ prefix, CallType.POST);
     }
 
 }

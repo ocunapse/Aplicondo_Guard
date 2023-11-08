@@ -3,6 +3,7 @@ package com.ocunapse.aplicondo.guard.ui.home;
 import static com.ocunapse.aplicondo.guard.util.GeneralComponent.AlertBox;
 import static com.ocunapse.aplicondo.guard.util.StringUtil.hmacWithJava;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,13 +14,13 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.material.snackbar.Snackbar;
 import com.google.mlkit.vision.barcode.common.Barcode;
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanner;
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions;
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning;
 import com.ocunapse.aplicondo.guard.R;
 import com.ocunapse.aplicondo.guard.databinding.FragmentHomeBinding;
+import com.ocunapse.aplicondo.guard.ui.WalkInActivity;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -38,6 +39,7 @@ public class HomeFragment extends Fragment {
         View root = binding.getRoot();
 
         final ImageButton scanBtn = binding.scanQrBtn;
+        final ImageButton walkinBtn = binding.walkInBtn;
 
         scanBtn.setOnClickListener(view -> {
             GmsBarcodeScannerOptions options = new GmsBarcodeScannerOptions.Builder()
@@ -67,6 +69,11 @@ public class HomeFragment extends Fragment {
                     System.out.println(e);;
                 }
             });
+        });
+
+        walkinBtn.setOnClickListener(view -> {
+            Intent i = new Intent(getActivity(), WalkInActivity.class);
+            startActivity(i);
         });
 
 

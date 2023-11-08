@@ -1,5 +1,9 @@
 package com.ocunapse.aplicondo.guard;
 
+
+import static com.ocunapse.aplicondo.guard.util.StringUtil.md5;
+
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -7,23 +11,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import androidx.navigation.ui.AppBarConfiguration;
 
+import com.auth0.android.jwt.JWT;
 import com.google.android.material.snackbar.Snackbar;
+import com.ocunapse.aplicondo.guard.api.LoginRequest;
 import com.ocunapse.aplicondo.guard.databinding.ActivityLoginBinding;
 
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
+import java.util.Objects;
 
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private AppBarConfiguration appBarConfiguration;
+    private GuardApp application = new GuardApp();
     private ActivityLoginBinding binding;
 
     @Override
@@ -33,59 +31,38 @@ public class LoginActivity extends AppCompatActivity {
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        if(application.getToken() != null) {
+            finish();
+            Intent i = new Intent(LoginActivity.this, HomeActivity.class);
+            startActivity(i);
+        }
 
         binding.loginButton.setOnClickListener(v -> {
             String uname = binding.loginUsername.getText().toString();
-            String pwd = binding.loginPassword.getText().toString();
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        final MediaType JSON = MediaType.get("application/json");
-                        OkHttpClient client = new OkHttpClient();
-                        RequestBody formBody = RequestBody.create("{\"userId\":\"" + uname + "\",\"password\":\"" + md5(pwd).toLowerCase() + "\"}", JSON);
-                        Request request = new Request.Builder()
-                                .post(formBody)
-                                .url("https://aplicondo.ocunapse.com/api/login")
-                                .build();
-                        try {
-                            Response response = client.newCall(request).execute();
-                            System.out.println(response.body().string());
-//                            {"success":false,"error":{"message":"Invalid credentials","cause":"","code":1040}}
-                            Intent i = new Intent(LoginActivity.this, HomeActivity.class);
-                            startActivity(i);
-                        } catch (IOException err) {
-                            System.out.println("err = " + err);
-                            Snackbar.make(binding.getRoot(),"FUck", Snackbar.LENGTH_LONG).show();
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+            String pwd = md5(binding.loginPassword.getText().toString());
+            System.out.println(uname + " " + pwd);
+            ProgressDialog dialog = ProgressDialog.show(this, "",
+                    "Loading. Please wait...", true);
+            LoginRequest lr = new LoginRequest(uname,pwd, res -> {
+                if(res.success){
+                    JWT jwt = new JWT(res.tokens.accessToken);
+                    String role = Objects.requireNonNull(jwt.getClaim("role").asString());
+                    if(!role.equals("Security")) {
+                        Snackbar.make(v, "Not Authorized", Snackbar.LENGTH_LONG).show();
                     }
+                    application.setToken(res.tokens.accessToken);
+                    finish();
+                    Intent i = new Intent(LoginActivity.this, HomeActivity.class);
+                    startActivity(i);
+                }else{
+                    Snackbar.make(v,"Not Authorized",Snackbar.LENGTH_LONG).show();
                 }
+                dialog.dismiss();
             });
-
-            thread.start();
-
+            lr.execute();
         });
     }
 
-    public String md5(String s) {
-        try {
-            // Create MD5 Hash
-            MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
-            digest.update(s.getBytes());
-            byte messageDigest[] = digest.digest();
 
-            // Create Hex String
-            StringBuffer hexString = new StringBuffer();
-            for (int i=0; i<messageDigest.length; i++)
-                hexString.append(String.format("%02X", messageDigest[i]));
-
-            return hexString.toString();
-        }catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
 
 }

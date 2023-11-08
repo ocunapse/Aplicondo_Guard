@@ -3,6 +3,8 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="scan_btn">Scan Visitor QR</string>
+    <string name="guard_string">Guard</string>
+    <string name="walk_in_btn">Walk In</string>
     <string name="general_title">Aplicondo</string>
     <string name="invalid_qr_error">Invalid QR code</string>
     <string name="title_notifications">Notifications</string>
@@ -49,4 +51,7 @@
         libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
+    <string name="title_activity_splash">SplashActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.ocunapse.aplicondo.guard.GuardApp;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -20,8 +21,9 @@ import javax.net.ssl.X509TrustManager;
 
 public class RequestBase extends AsyncTask<Void,Void, String> implements Serializable {
 
+    public static GuardApp application = new GuardApp();
     public static Gson g = new GsonBuilder().create();
-    public static String server = "https://aplicondo.ocunapse.com/v1/live/api.php";
+    public static String server = "https://aplicondo.ocunapse.com/v1/api";
     public static boolean Debug = true;
     public static boolean Live = true;
 
@@ -36,12 +38,13 @@ public class RequestBase extends AsyncTask<Void,Void, String> implements Seriali
 //
     public String Action;
 
-    public static class APIerror{
-        public int code;
-        public String msg;
+    public static class APIError{
+        public int code = 0;
+        public String message;
+        public String cause;
     }
 
-    public APIerror ServerLost;
+    public APIError ServerLost;
 
     public enum CallType{
         POST {
@@ -73,10 +76,10 @@ public class RequestBase extends AsyncTask<Void,Void, String> implements Seriali
     };
 
 
-    public interface LoginResult{           void get(LoginRequest.LoginRes res);        }
+    public interface LoginResult{           void get(LoginRequest.LoginRes res);            }
+    public interface UnitListResult{        void get(UnitListRequest.UnitListRes res);      }
 //
 //    //game
-//    public interface GetQueueResult{        void get(GetQueueRequest.GetQueueRes res);              }
 //    public interface TableListResult{       void get(TableListRequest.TableListRes res);            }
 //    public interface ReceiptGameResult{    void get(RegisterGameRequest.RegisterGameRes res);      }
 //    public interface GameBookResult{        void get(GameBookRequest.GameBookRes res);              }
@@ -95,8 +98,8 @@ public class RequestBase extends AsyncTask<Void,Void, String> implements Seriali
     }
 
     public String Request(String data, String server, CallType ct) {
-        ServerLost = new APIerror();
-        ServerLost.msg = "Sorry Server Down Please try again Later";
+        ServerLost = new APIError();
+        ServerLost.message = "Sorry Server Down Please try again Later";
         ServerLost.code = 999;
         if(server.startsWith("https"))
             return HttpsRequest(data, server, ct);
@@ -119,9 +122,10 @@ public class RequestBase extends AsyncTask<Void,Void, String> implements Seriali
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
             conn.setUseCaches(false);
+            conn.setRequestProperty("Authorization","BEARER "+application.getToken());
+            conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
             if(ct == CallType.POST) {
                 conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
                 conn.setDoOutput(true);
                 OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
 
@@ -236,5 +240,36 @@ public class RequestBase extends AsyncTask<Void,Void, String> implements Seriali
     public static void LOG( String tag, String msg){
         if(Debug) Log.d(tag,msg);
     }
+
+
+
+    //            Thread thread = new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    try {
+//                        final MediaType JSON = MediaType.get("application/json");
+//                        OkHttpClient client = new OkHttpClient();
+//                        RequestBody formBody = RequestBody.create("{\"userId\":\"" + uname + "\",\"password\":\"" + md5(pwd).toLowerCase() + "\"}", JSON);
+//                        Request request = new Request.Builder()
+//                                .post(formBody)
+//                                .url("https://aplicondo.ocunapse.com/api/login")
+//                                .build();
+//                        try {
+//                            Response response = client.newCall(request).execute();
+//                            System.out.println(response.body().string());
+////                            {"success":false,"error":{"message":"Invalid credentials","cause":"","code":1040}}
+//                            Intent i = new Intent(LoginActivity.this, HomeActivity.class);
+//                            startActivity(i);
+//                        } catch (IOException err) {
+//                            System.out.println("err = " + err);
+//                            Snackbar.make(binding.getRoot(),"FUck", Snackbar.LENGTH_LONG).show();
+//                        }
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            });
+
+//            thread.start();
 
 }

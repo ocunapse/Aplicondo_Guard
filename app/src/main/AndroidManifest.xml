@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".GuardApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -14,10 +16,10 @@
         android:theme="@style/Theme.AplicondoGuard"
         tools:targetApi="31">
         <activity
-            android:name=".LoginActivity"
+            android:name=".SplashActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="true"
-            android:label="@string/title_activity_main"
-            android:theme="@style/Theme.AplicondoGuard">
+            android:theme="@style/Theme.AplicondoGuard.Fullscreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -25,22 +27,23 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".HomeActivity"
+            android:name=".ui.WalkInActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LoginActivity"
             android:exported="true"
-            android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:label="@string/title_activity_main"
+            android:theme="@style/Theme.AplicondoGuard"/>
+        <activity
+            android:name=".HomeActivity"
+            android:exported="true"/>
 
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
         <meta-data
             android:name="com.google.mlkit.vision.DEPENDENCIES"
-            android:value="barcode_ui"/>
+            android:value="barcode_ui" />
     </application>
 
 </manifest>
