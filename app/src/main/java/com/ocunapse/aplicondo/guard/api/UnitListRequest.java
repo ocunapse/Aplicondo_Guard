@@ -17,6 +17,13 @@ public class UnitListRequest extends RequestBase {
         public int id ;
         public String unit_label;
         public int owner_id;
+        public int site_id;
+        public String block;
+        public String floor;
+        public int level;
+        public int unit_type_id;
+        public String site_unit;
+        public boolean subletting_allowed;
     }
 
 

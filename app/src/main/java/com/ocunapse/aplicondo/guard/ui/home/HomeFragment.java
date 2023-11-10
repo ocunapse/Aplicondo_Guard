@@ -3,12 +3,15 @@ package com.ocunapse.aplicondo.guard.ui.home;
 import static com.ocunapse.aplicondo.guard.util.GeneralComponent.AlertBox;
 import static com.ocunapse.aplicondo.guard.util.StringUtil.hmacWithJava;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -19,12 +22,9 @@ import com.google.mlkit.vision.codescanner.GmsBarcodeScanner;
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions;
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning;
 import com.ocunapse.aplicondo.guard.R;
+import com.ocunapse.aplicondo.guard.api.VisitorCheckInRequest;
 import com.ocunapse.aplicondo.guard.databinding.FragmentHomeBinding;
 import com.ocunapse.aplicondo.guard.ui.WalkInActivity;
-
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Objects;
 
 public class HomeFragment extends Fragment {
 
@@ -58,13 +58,26 @@ public class HomeFragment extends Fragment {
                         boolean isMatch = VerifyData(part[0].trim(), sig);
                         String msg = "Sig : " + sig + " - The Signature is" + ( isMatch ? " " : " NOT ") + "match.";
 //                        AlertBox(getContext(), msg);
-                        AlertBox(getContext(), isMatch?"\uD83D\uDC4D":getString(R.string.invalid_qr_error));
+
+                        if(isMatch){
+                            String[] data = part[0].trim().split(",");
+                            int visitorId = Integer.parseInt(data[0]);
+                            VisitorCheckInRequest vci = new VisitorCheckInRequest(visitorId, res -> {
+                               if(res.success) {
+                                   VisitorDialog(res.data);
+                               }
+                            });
+                            vci.execute();
+                        }else {
+                            AlertBox(getContext(),getString(R.string.invalid_qr_error));
+                        }
+
                     } catch (Exception e) {
                         System.out.print(e.getMessage());
                     }
                 }catch (Exception e){
                     if(e instanceof ArrayIndexOutOfBoundsException){
-                        AlertBox(getContext(), getString(R.string.invalid_qr_error));
+                        AlertBox(getContext(), R.string.invalid_qr_error);
                     }
                     System.out.println(e);;
                 }
@@ -115,6 +128,28 @@ public class HomeFragment extends Fragment {
             System.out.print(e.getMessage());
         }
         return res;
+    }
+
+    private void VisitorDialog(VisitorCheckInRequest.Visitor visitor){
+        final Dialog dialog = new Dialog(this.requireActivity());
+        dialog.setContentView(R.layout.dialog_visitor);
+        TextView name = dialog.findViewById(R.id.visitor_name_textview);
+        TextView vehicle = dialog.findViewById(R.id.visitor_vehicle_textview);
+        TextView phone = dialog.findViewById(R.id.visitor_phone_textview);
+        TextView resident = dialog.findViewById(R.id.visitor_resident_name_textview);
+        TextView resident_phone = dialog.findViewById(R.id.visitor_resident_phone_textview);
+
+        name.setText(visitor.name);
+        phone.setText(visitor.mobile_number);
+        vehicle.setText(visitor.vehicle_registration == null ? "-":visitor.vehicle_registration);
+        resident.setText(visitor.profile.full_name);
+        resident_phone.setText(visitor.profile.phone_number);
+
+        Button proceed =  dialog.findViewById(R.id.visitor_verified_btn);
+
+        proceed.setOnClickListener(view -> dialog.dismiss());
+
+        dialog.show();
     }
 
 

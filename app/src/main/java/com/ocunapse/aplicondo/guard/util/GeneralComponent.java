@@ -11,6 +11,16 @@ public class GeneralComponent {
     public static void AlertBox(Context ctx, String msg){
         AlertBox(ctx,msg,null);
     }
+
+    public static void AlertBox(Context ctx, int msg){
+        AlertBox(ctx,msg,null);
+    }
+
+    public static void AlertBox(Context ctx, int msg,DialogInterface.OnClickListener ocl){
+        String message = ctx.getString(msg);
+        AlertBox(ctx,message,ocl);
+    }
+
     public static void AlertBox(Context ctx, String msg, DialogInterface.OnClickListener ocl){
         AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(ctx);
         dlgAlert.setMessage(msg);

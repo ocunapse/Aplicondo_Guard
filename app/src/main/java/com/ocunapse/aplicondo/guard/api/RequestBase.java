@@ -78,9 +78,9 @@ public class RequestBase extends AsyncTask<Void,Void, String> implements Seriali
 
     public interface LoginResult{           void get(LoginRequest.LoginRes res);            }
     public interface UnitListResult{        void get(UnitListRequest.UnitListRes res);      }
+    public interface VisitorResult{         void get(VisitorCheckInRequest.VisitorRes res); }
 //
 //    //game
-//    public interface TableListResult{       void get(TableListRequest.TableListRes res);            }
 //    public interface ReceiptGameResult{    void get(RegisterGameRequest.RegisterGameRes res);      }
 //    public interface GameBookResult{        void get(GameBookRequest.GameBookRes res);              }
 //    public interface CancelBookResult{      void get(CancelBookRequest.CancelBookRes res);          }
