@@ -5,12 +5,13 @@ import android.util.Log;
 
 public class VisitorCheckInRequest extends RequestBase {
 
-    private static String prefix = "/visitor/visit/";
+    private final static String prefix = "/visitor/visit/";
     VisitorResult res;
+    int visitorId;
 
     public VisitorCheckInRequest(int visitorId, VisitorResult res) {
         this.res = res;
-        prefix = prefix+visitorId;
+        this.visitorId = visitorId;
     }
 
     public static class Profile {
@@ -78,7 +79,7 @@ public class VisitorCheckInRequest extends RequestBase {
 
     @Override
     protected String doInBackground(Void... voids) {
-        return Request(null, server + prefix, CallType.GET);
+        return Request(null, server + prefix + visitorId, CallType.GET);
     }
 
 }

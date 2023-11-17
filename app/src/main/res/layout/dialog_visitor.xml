@@ -2,8 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android.support.design="http://schemas.android.com/tools"
     android:layout_marginStart="8dp"
-    android:layout_marginLeft="8dp"
     android:layout_marginTop="16dp"
     android:layout_marginEnd="8dp"
     android:layout_marginBottom="16dp"
@@ -19,140 +20,163 @@
         android:layout_marginBottom="8dp"
         android:gravity="center"
         android:text="Visitor"
+        android:textSize="24sp"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:textStyle="bold" />
 
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:boxStrokeWidth="0dp"
+        app:boxStrokeWidthFocused="0dp"
+        android:textColorHint="@color/aplicondo_red"
+        app:hintTextColor="@color/aplicondo_red"
+        app:hintTextAppearance="@style/HintLabel"
+        android:hint="Visitor Name">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/visitor_name_edittext"
+            android:layout_width="match_parent"
+            android:editable="false"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_height="wrap_content"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:boxStrokeWidth="0dp"
+        app:boxStrokeWidthFocused="0dp"
+        app:hintTextColor="@color/aplicondo_red"
+        android:textColorHint="@color/aplicondo_red"
+        app:hintTextAppearance="@style/HintLabel"
+        android:hint="Visitor Phone Number">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/visitor_phone_edittext"
+            android:layout_width="match_parent"
+            android:editable="false"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_height="wrap_content"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:boxStrokeWidth="0dp"
+        app:boxStrokeWidthFocused="0dp"
+        android:textColorHint="@color/aplicondo_red"
+        app:hintTextColor="@color/aplicondo_red"
+        app:hintTextAppearance="@style/HintLabel"
+        android:hint="Vehicle Registration No">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/visitor_vehicle_edittext"
+            android:layout_width="match_parent"
+            android:editable="false"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_height="wrap_content"/>
+    </com.google.android.material.textfield.TextInputLayout>
+<Space
+    android:layout_width="match_parent"
+    android:layout_height="18dp"/>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:boxStrokeWidth="0dp"
+        app:boxStrokeWidthFocused="0dp"
+        android:textColorHint="@color/aplicondo_red"
+        app:hintTextColor="@color/aplicondo_red"
+        app:hintTextAppearance="@style/HintLabel"
+        android:hint="Resident Unit">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/visitor_resident_unit_edittext"
+            android:layout_width="match_parent"
+            android:editable="false"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_height="wrap_content"/>
+    </com.google.android.material.textfield.TextInputLayout>
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:boxStrokeWidth="0dp"
+        app:boxStrokeWidthFocused="0dp"
+        android:textColorHint="@color/aplicondo_red"
+        app:hintTextColor="@color/aplicondo_red"
+        app:hintTextAppearance="@style/HintLabel"
+        android:hint="Resident Name">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/visitor_resident_name_edittext"
+            android:layout_width="match_parent"
+            android:editable="false"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_height="wrap_content"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:boxStrokeWidth="0dp"
+        app:boxStrokeWidthFocused="0dp"
+        android:textColorHint="@color/aplicondo_red"
+        app:hintTextColor="@color/aplicondo_red"
+        app:hintTextAppearance="@style/HintLabel"
+        android:hint="Resident Phone Number">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/visitor_resident_phone_edittext"
+            android:layout_width="match_parent"
+            android:editable="false"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_height="wrap_content"/>
+    </com.google.android.material.textfield.TextInputLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/textView10"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:text="Visitor Name :" />
-
-        <TextView
-            android:id="@+id/visitor_name_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="TextView" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/textView12"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:text="Visitor Phone Number :" />
-
-        <TextView
-            android:id="@+id/visitor_phone_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="TextView" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/textView11"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:text="Vehicle Registration :" />
-
-        <TextView
-            android:id="@+id/visitor_vehicle_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="TextView" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="4dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/textView13"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:text="Resident Name :" />
-
-        <TextView
-            android:id="@+id/visitor_resident_name_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="TextView" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/textView14"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:text="Resident Phone Number :" />
-
-        <TextView
-            android:id="@+id/visitor_resident_phone_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="TextView" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="32dp"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/visitor_reject_btn"
-            style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:background="@null"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
+            android:textAllCaps="true"
+            android:backgroundTint="@color/aplicondo_red"
             android:layout_weight="1"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:textSize="18sp"
             android:text="Reject"/>
-
+<Space
+    android:layout_width="20dp"
+    android:layout_height="match_parent"/>
         <Button
             android:id="@+id/visitor_verified_btn"
-            style="@style/Widget.AppCompat.Button"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:background="@null"
+            android:theme="@style/Theme.Design.Light.NoActionBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:backgroundTint="@color/positive_green"
+            android:textColor="@color/white"
+            android:textAllCaps="true"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:textSize="18sp"
             android:text="Verified" />
     </LinearLayout>
 </LinearLayout>

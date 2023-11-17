@@ -7,9 +7,9 @@
 
     <fragment
         android:id="@+id/navigation_home"
-        android:name="com.ocunapse.aplicondo.guard.ui.home.HomeFragment"
+        android:name="com.ocunapse.aplicondo.guard.ui.visitor_entry.EntryFragment"
         android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_entry" />
 
     <fragment
         android:id="@+id/navigation_dashboard"

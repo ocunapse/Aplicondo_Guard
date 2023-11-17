@@ -7,13 +7,10 @@ import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 
-import com.google.gson.Gson;
 import com.ocunapse.aplicondo.guard.R;
-import com.ocunapse.aplicondo.guard.api.RequestBase;
 import com.ocunapse.aplicondo.guard.api.UnitListRequest;
-import com.ocunapse.aplicondo.guard.databinding.ActivityLoginBinding;
+
 import com.ocunapse.aplicondo.guard.databinding.ActivityWalkInBinding;
-import com.ocunapse.aplicondo.guard.databinding.FragmentHomeBinding;
 
 import java.util.ArrayList;
 

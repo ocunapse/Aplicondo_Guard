@@ -7,6 +7,8 @@
     <string name="walk_in_btn">Walk In</string>
     <string name="general_title">Aplicondo</string>
     <string name="invalid_qr_error">Invalid QR code</string>
+    <string name="expired_qr_error">This pass is expired</string>
+    <string name="no_visitor_error">No Visitor pass found. This pass might be delete by the resident.</string>
     <string name="title_notifications">Notifications</string>
     <string name="title_activity_main">MainActivity</string>
     <!-- Strings used for fragments for navigation -->
@@ -54,4 +56,6 @@
     <string name="title_activity_splash">SplashActivity</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="scan_qr_desc">Scan a qr code to enable the visitor to check in</string>
+    <string name="manually_visitor_details">Manually enter visitor details</string>
 </resources>

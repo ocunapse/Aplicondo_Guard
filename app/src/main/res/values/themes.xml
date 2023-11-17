@@ -36,6 +36,13 @@
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
+    <style name="HintLabel" parent="TextAppearance.Design.Hint">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColorHint">@color/aplicondo_red</item>
+        <item name="android:textColor">@color/aplicondo_red</item>
+    </style>
+
     <style name="Theme.AplicondoGuard.Fullscreen" parent="Theme.AplicondoGuard">
         <item name="android:actionBarStyle">
             @style/Widget.Theme.AplicondoGuard.ActionBar.Fullscreen

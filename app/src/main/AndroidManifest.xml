@@ -2,7 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:name=".GuardApp"
@@ -11,14 +16,20 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AplicondoGuard"
+        android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity
+            android:name=".barcode.ScannerActivity"
+            android:exported="false" />
         <activity
             android:name=".SplashActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="true"
+            android:screenOrientation="sensorPortrait"
             android:theme="@style/Theme.AplicondoGuard.Fullscreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,10 +44,12 @@
             android:name=".LoginActivity"
             android:exported="true"
             android:label="@string/title_activity_main"
-            android:theme="@style/Theme.AplicondoGuard"/>
+            android:screenOrientation="sensorPortrait"
+            android:theme="@style/Theme.AplicondoGuard" />
         <activity
             android:name=".HomeActivity"
-            android:exported="true"/>
+            android:exported="true"
+            android:screenOrientation="sensorPortrait" />
 
         <meta-data
             android:name="preloaded_fonts"
