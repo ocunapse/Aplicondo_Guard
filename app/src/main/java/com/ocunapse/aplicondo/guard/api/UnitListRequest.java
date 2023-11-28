@@ -2,6 +2,8 @@ package com.ocunapse.aplicondo.guard.api;
 
 import android.util.Log;
 
+import java.util.Locale;
+
 public class UnitListRequest extends RequestBase {
     private String prefix;
     UnitListResult res;
@@ -10,7 +12,17 @@ public class UnitListRequest extends RequestBase {
     public UnitListRequest( UnitListResult res) {
         this.siteId = application.getSite();
         this.res = res;
-        prefix = String.format("/units/%d",siteId );
+        prefix = String.format(Locale.ENGLISH,"/units/%d",siteId );
+    }
+
+    public static class Profile {
+        public int id;
+        public String full_name;
+        public String identification;
+        public String email;
+        public String phone_number;
+        public String gender;
+        public String photo_url;
     }
 
     public static class Unit {
@@ -24,6 +36,33 @@ public class UnitListRequest extends RequestBase {
         public int unit_type_id;
         public String site_unit;
         public boolean subletting_allowed;
+
+        public Owner owners;
+        public Tenant[] tenants;
+    }
+
+    public class Owner{
+        public int id;
+        public int profile_id;
+        public Profile profile;
+        public Family[] family;
+    }
+    public class Tenant{
+        public int id;
+        public int profile_id;
+        public boolean is_master;
+        public int unit_id;
+        public Family[] family;
+        public Profile profile;
+    }
+
+    public static class Family {
+        public int id;
+        public int profile_id;
+        public int unit_id;
+        public int ownersId;
+        public int tenantsId;
+        public Profile profile;
     }
 
 
