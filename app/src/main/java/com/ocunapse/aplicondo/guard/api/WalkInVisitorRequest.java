@@ -21,25 +21,29 @@ public class WalkInVisitorRequest extends RequestBase {
     String visitDate;
     String endDate;
     String plateNum;
-    String Transport;
+    String transports;
+    String image_url;
 
     public enum Transport {
         WALK_IN,
         VEHICLE
     }
 
-    public WalkInVisitorRequest(String name, String mobile_number,String vehicle_registration,Transport transport,long visit_date,  WalkInResult res) {
+    public WalkInVisitorRequest(int unit_id, int profile_id, String name, String mobile_number,String vehicle_registration,Transport transport,long visit_date,String image,  WalkInResult res) {
         TimeZone malaysianTimeZone = TimeZone.getTimeZone("Asia/Kuala_Lumpur");
         SimpleDateFormat start = new SimpleDateFormat("yyyy/MM/dd 00:00:01 z");
         start.setTimeZone(malaysianTimeZone);
         SimpleDateFormat end = new SimpleDateFormat("yyyy/MM/dd 23:59:00 z");
         end.setTimeZone(malaysianTimeZone);
+        this.unit_id = unit_id;
+        this.profile_id = profile_id;
         this.Name = name;
         this.mobNum = mobile_number;
-        this.plateNum = vehicle_registration;
-        this.Transport = transport.toString();
+        this.plateNum = transport == Transport.WALK_IN ? vehicle_registration : null;
+        this.transports = transport.toString();
         this.visitDate = start.format(new Date(visit_date));
         this.endDate = end.format(new Date(visit_date));
+        this.image_url = image;
         Log.d("walkin",visit_date + " --- " + this.visitDate +" ---- " +endDate);
         this.res = res;
     }
@@ -50,9 +54,10 @@ public class WalkInVisitorRequest extends RequestBase {
         String visit_date = visitDate;
         String end_date = endDate;
         String vehicle_registration = plateNum;
-        String transport = Transport;
+        String transport = transports;
         String category="VISITOR";
         String type="ONE_TIME";
+        String imageUrl = image_url;
     }
 
 
@@ -65,6 +70,7 @@ public class WalkInVisitorRequest extends RequestBase {
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
+        Log.d("walkin", s);
         if(s.length() < 1) {
             WalkInRes rs = new WalkInRes();
             rs.success = false;
@@ -95,7 +101,7 @@ public class WalkInVisitorRequest extends RequestBase {
         Log.d("walkin", data);
         String url = server + prefix + unit_id + "/" + profile_id + "/createVisit";
         Log.d("walkin", url);
-        return "";//Request(data, url , CallType.POST);
+        return Request(data, url , CallType.POST);
     }
 
 }

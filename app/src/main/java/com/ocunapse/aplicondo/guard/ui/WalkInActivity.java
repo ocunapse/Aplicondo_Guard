@@ -2,10 +2,10 @@ package com.ocunapse.aplicondo.guard.ui;
 
 import static android.Manifest.permission_group.CAMERA;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,7 +17,6 @@ import android.graphics.Matrix;
 import android.graphics.Typeface;
 import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.MediaStore;
@@ -27,7 +26,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -38,16 +36,20 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import com.ocunapse.aplicondo.guard.api.UnitListRequest;
 
+import com.ocunapse.aplicondo.guard.api.UploadImage;
 import com.ocunapse.aplicondo.guard.api.WalkInVisitorRequest;
 import com.ocunapse.aplicondo.guard.databinding.ActivityWalkInBinding;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class WalkInActivity extends AppCompatActivity {
@@ -227,10 +229,46 @@ public class WalkInActivity extends AppCompatActivity {
 
         binding.submitWalkin.setOnClickListener(view -> {
             boolean hasError = verify().length() > 0;
+            String nameVal = name.getText().toString();
+            String phoneVal = phone.getText().toString();
+            String vnumVal = vehicleNum.getText().toString();
+            WalkInVisitorRequest.Transport transport  = binding.transportGroup.getCheckedRadioButtonId() == binding.walkinRadio.getId() ? WalkInVisitorRequest.Transport.WALK_IN : WalkInVisitorRequest.Transport.VEHICLE;
+            long time = new Date().getTime();
             if(!hasError){
-                new WalkInVisitorRequest(name.getText().toString(), phone.getText().toString(),vehicleNum.getText().toString(), WalkInVisitorRequest.Transport.WALK_IN,new Date().getTime(),res -> {
+                File f = new File(this.getCacheDir().getAbsolutePath(), "document.png");
+                try {
+                    f.createNewFile();
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    myBitmap.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+                    byte[] bitmapdata = bos.toByteArray();
 
+//write the bytes in file
+                    FileOutputStream fos = null;
+                        fos = new FileOutputStream(f);
+
+                        fos.write(bitmapdata);
+                        fos.flush();
+                        fos.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                new UploadImage(unit_id, resident_id, f, Ures -> {
+                    String image = null;
+                    if(Ures.success) image = Ures.data.url;
+                    new WalkInVisitorRequest(unit_id, resident_id, nameVal,phoneVal,vnumVal,transport,time, image, res -> {
+                        if(res.success) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                            builder.setMessage("Record Added")
+                                    .setPositiveButton("OK", (dialog, id) -> {
+                                        dialog.dismiss();
+                                        finish();
+                                    });
+                            builder.create().show();
+                        }
+                    }).execute();
                 }).execute();
+
             }
             else {
                 Snackbar.make(view,verify(),Snackbar.LENGTH_LONG).show();
@@ -243,13 +281,13 @@ public class WalkInActivity extends AppCompatActivity {
     private String verify() {
 
         if(residentView.getText().toString().trim().length() < 2) return "Resident name is not filled";
+        if(unit_id == 0 ) return "Invalid Unit";
         if(resident_id == 0 ) return "Invalid resident name";
         if(name.getText().toString().trim().length() < 2) return "Name not long enough";
-        if(vehicleNum.getText().toString().trim().length() < 2 ) return "Vehicle No not long enough";
+        if(binding.transportGroup.getCheckedRadioButtonId() == binding.vehicleRadio.getId())
+            if(vehicleNum.getText().toString().trim().length() < 2 ) return "Vehicle No not long enough";
         if(reason.getText().toString().trim().length() < 3) return "Reason text not long enough";
         if(phone.getText().toString().trim().length() < 3) return "Invalid Phone Number";;
-
-
 
         try {
             Phonenumber.PhoneNumber number = phoneNumberUtil.parse(phone.getText(), "MY");

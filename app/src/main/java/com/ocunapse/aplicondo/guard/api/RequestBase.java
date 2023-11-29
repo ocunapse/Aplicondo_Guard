@@ -1,5 +1,7 @@
 package com.ocunapse.aplicondo.guard.api;
 
+import static com.ocunapse.aplicondo.guard.util.StringUtil.md5;
+
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -8,6 +10,8 @@ import com.google.gson.GsonBuilder;
 import com.ocunapse.aplicondo.guard.GuardApp;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
@@ -18,6 +22,18 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.http.Multipart;
+import retrofit2.http.POST;
+import retrofit2.http.Part;
 
 public class RequestBase extends AsyncTask<Void,Void, String> implements Serializable {
 
@@ -58,6 +74,13 @@ public class RequestBase extends AsyncTask<Void,Void, String> implements Seriali
             public String toString() {
                 return "GET";
             }
+        },
+
+        PUT {
+            @Override
+            public String toString() {
+                return "PUT";
+            }
         }
     }
 
@@ -80,9 +103,9 @@ public class RequestBase extends AsyncTask<Void,Void, String> implements Seriali
     public interface UnitListResult{        void get(UnitListRequest.UnitListRes res);      }
     public interface VisitorResult{         void get(VisitorCheckInRequest.VisitorRes res); }
     public interface WalkInResult{          void get(WalkInVisitorRequest.WalkInRes res);   }
+    public interface UploadImageResult{     void get(UploadImage.UploadImageRes res);       }
 //
 //    //game
-//    public interface ReceiptGameResult{    void get(RegisterGameRequest.RegisterGameRes res);      }
 //    public interface GameBookResult{        void get(GameBookRequest.GameBookRes res);              }
 //    public interface CancelBookResult{      void get(CancelBookRequest.CancelBookRes res);          }
 //    public interface UpdateContactResult{   void get(UpdateContactRequest.UpdateContactRes res);    }
@@ -102,10 +125,24 @@ public class RequestBase extends AsyncTask<Void,Void, String> implements Seriali
         ServerLost = new APIError();
         ServerLost.message = "Sorry Server Down Please try again Later";
         ServerLost.code = 999;
-        if(server.startsWith("https"))
-            return HttpsRequest(data, server, ct);
-        else
-            return HttpRequest(data, server, ct);
+        try {
+            return ApiRequest(server,data, ct);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            return "";
+        }
+    }
+
+    public String RequestMultipart(File file, String server, CallType ct) {
+        ServerLost = new APIError();
+        ServerLost.message = "Sorry Server Down Please try again Later";
+        ServerLost.code = 999;
+        try {
+            return ApiRequestMultipart(server,file, ct);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            return "";
+        }
     }
 
     public String HttpsRequest(String data, String server, CallType ct){
@@ -125,8 +162,8 @@ public class RequestBase extends AsyncTask<Void,Void, String> implements Seriali
             conn.setUseCaches(false);
             conn.setRequestProperty("Authorization","BEARER "+application.getToken());
             conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
-            if(ct == CallType.POST) {
-                conn.setRequestMethod("POST");
+            if(ct == CallType.POST || ct == CallType.PUT) {
+                conn.setRequestMethod(String.valueOf(ct));
                 conn.setDoOutput(true);
                 OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
 
@@ -185,8 +222,8 @@ public class RequestBase extends AsyncTask<Void,Void, String> implements Seriali
 //            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
             conn.setUseCaches(false);
-            if(ct == CallType.POST) {
-                conn.setRequestMethod("POST");
+            if(ct == CallType.POST || ct == CallType.PUT) {
+                conn.setRequestMethod(String.valueOf(ct));
                 conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
                 conn.setDoOutput(true);
                 OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
@@ -197,7 +234,6 @@ public class RequestBase extends AsyncTask<Void,Void, String> implements Seriali
                 wr.flush();
                 wr.close();
             }
-
 
             int respCode = conn.getResponseCode();
             Log.d("responsecode",respCode+"");
@@ -243,34 +279,52 @@ public class RequestBase extends AsyncTask<Void,Void, String> implements Seriali
     }
 
 
+    public String ApiRequest(String server, String body, CallType ct) throws IOException {
+        final MediaType JSON = MediaType.get("application/json;charset=UTF-8");
 
-    //            Thread thread = new Thread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    try {
-//                        final MediaType JSON = MediaType.get("application/json");
-//                        OkHttpClient client = new OkHttpClient();
-//                        RequestBody formBody = RequestBody.create("{\"userId\":\"" + uname + "\",\"password\":\"" + md5(pwd).toLowerCase() + "\"}", JSON);
-//                        Request request = new Request.Builder()
-//                                .post(formBody)
-//                                .url("https://aplicondo.ocunapse.com/api/login")
-//                                .build();
-//                        try {
-//                            Response response = client.newCall(request).execute();
-//                            System.out.println(response.body().string());
-////                            {"success":false,"error":{"message":"Invalid credentials","cause":"","code":1040}}
-//                            Intent i = new Intent(LoginActivity.this, HomeActivity.class);
-//                            startActivity(i);
-//                        } catch (IOException err) {
-//                            System.out.println("err = " + err);
-//                            Snackbar.make(binding.getRoot(),"FUck", Snackbar.LENGTH_LONG).show();
-//                        }
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            });
+        OkHttpClient client = new OkHttpClient();
+        RequestBody formBody = null;
+        if(body != null)
+         formBody = RequestBody.create(body, JSON);
+       Request.Builder rb  = new Request.Builder().url(server);
+       if(application.getToken() != null) rb.header("Authorization","BEARER "+application.getToken());
 
-//            thread.start();
+       Request request;
+        if(ct == CallType.POST) request = rb.post(formBody).build();
+        else if(ct == CallType.PUT) request = rb.put(formBody).build();
+        else request = rb.get().build();
+        Response response = client.newCall(request).execute();
+        assert response.body() != null;
+        return response.body().string();
+    }
+
+    public interface UploadAPIs {
+        @Multipart
+        @POST("/upload")
+        Call<ResponseBody> uploadImage(@Part MultipartBody.Part file, @Part("media") RequestBody requestBody);
+    }
+
+    public String ApiRequestMultipart(String server, File file, CallType ct) throws IOException {
+
+        OkHttpClient client = new OkHttpClient();
+        System.out.println(file.getAbsolutePath());
+        System.out.println(file.getName());
+        RequestBody formBody = RequestBody.create(MediaType.parse("image/png"), file);
+//        MultipartBody.Part filePart = MultipartBody.Part.createFormData("media", "document.jpeg", formBody);
+        Request.Builder rb  = new Request.Builder().url(server);
+        if(application.getToken() != null) rb.header("Authorization","BEARER "+application.getToken());
+        RequestBody requestBody = new MultipartBody.Builder()
+                .setType(MediaType.parse("multipart/form-data"))
+                .addFormDataPart("media","document.png", formBody)
+                .build();
+        Request request;
+        if(ct == CallType.POST) request = rb.post(requestBody).build();
+        else if(ct == CallType.PUT) request = rb.put(requestBody).build();
+        else request = rb.get().build();
+        Response response = client.newCall(request).execute();
+        assert response.body() != null;
+        return response.body().string();
+    }
+
 
 }
