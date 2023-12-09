@@ -39,19 +39,15 @@ public class RequestBase extends AsyncTask<Void,Void, String> implements Seriali
 
     public static GuardApp application = new GuardApp();
     public static Gson g = new GsonBuilder().create();
-    public static String server = "https://aplicondo.ocunapse.com/v1/api";
     public static boolean Debug = true;
     public static boolean Live = true;
 
 
 
 
-    //    public static String gameServer = RequestBase.Live ?"http://www.arenakl.com/api/api.php" : "https://arenagames.worldquest.io/api.php"   ;
-//
-//    private static String[] reallocations = {"http://www.arenakl.com/api/api.php", "http://www.arenattdi.com/api/api.php"};
-//    private static String[] testlocations = {"https://arenagames.worldquest.io/api.php", "https://arenagames.worldquest.io/api.php"};
-//    public static String[] locations = RequestBase.Live ? reallocations : testlocations;
-//
+    public static String server = RequestBase.Live ?"https://aplicondo.ocunapse.com/v1/api" : "https://aplicondo.ocunapse.com/v1/api" ;
+
+
     public String Action;
 
     public static class APIError{
@@ -99,20 +95,21 @@ public class RequestBase extends AsyncTask<Void,Void, String> implements Seriali
     };
 
 
-    public interface LoginResult{           void get(LoginRequest.LoginRes res);            }
-    public interface UnitListResult{        void get(UnitListRequest.UnitListRes res);      }
-    public interface VisitorResult{         void get(VisitorCheckInRequest.VisitorRes res); }
-    public interface WalkInResult{          void get(WalkInVisitorRequest.WalkInRes res);   }
-    public interface UploadImageResult{     void get(UploadImage.UploadImageRes res);       }
-//
-//    //game
-//    public interface GameBookResult{        void get(GameBookRequest.GameBookRes res);              }
-//    public interface CancelBookResult{      void get(CancelBookRequest.CancelBookRes res);          }
-//    public interface UpdateContactResult{   void get(UpdateContactRequest.UpdateContactRes res);    }
-//    public interface GetPositionResult{     void get(GetPositionRequest.GetPositionRes res);        }
-//
-//    //iot
-//    public interface SettingsResult{        void get(SettingsRequest.iot res);                      }
+    public interface LoginResult{           void get(LoginRequest.LoginRes res);                    }
+    public interface UnitListResult{        void get(UnitListRequest.UnitListRes res);              }
+    public interface VisitorResult{         void get(VisitorCheckInRequest.VisitorRes res);         }
+    public interface WalkInResult{          void get(WalkInVisitorRequest.WalkInRes res);           }
+    public interface UploadImageResult{     void get(UploadImage.UploadImageRes res);               }
+    public interface VisitUpdateResult{     void get(VisitUpdateRequest.VisitUpdateRes res);        }
+    public interface ChangePasswordResult{  void get(ChangePasswordRequest.ChangePasswordRes res);  }
+    public interface VisitorListResult{     void get(VisitorListRequest.VisitorListRes res);        }
+    public interface ReportResult{          void get(ReportRequest.ReportRes res);                  }
+    public interface PushTokenUpdateResult{ void get(PushTokenUpdateRequest.PushTokenUpdateRes res);}
+
+    public interface EmergencyListResult{   void get(EmergencyListRequest.EmergencyListRes res);    }
+    public interface SOSUpdateResult{       void get(SOSUpdateRequest.SOSUpdateRes res);            }
+    public interface UploadReportImageResult{void get(UploadReportImages.UploadReportImgRes res);   }
+
 
 
 
@@ -133,7 +130,7 @@ public class RequestBase extends AsyncTask<Void,Void, String> implements Seriali
         }
     }
 
-    public String RequestMultipart(File file, String server, CallType ct) {
+    public String RequestMultipart(File[] file, String server, CallType ct) {
         ServerLost = new APIError();
         ServerLost.message = "Sorry Server Down Please try again Later";
         ServerLost.code = 999;
@@ -298,25 +295,22 @@ public class RequestBase extends AsyncTask<Void,Void, String> implements Seriali
         return response.body().string();
     }
 
-    public interface UploadAPIs {
-        @Multipart
-        @POST("/upload")
-        Call<ResponseBody> uploadImage(@Part MultipartBody.Part file, @Part("media") RequestBody requestBody);
-    }
-
-    public String ApiRequestMultipart(String server, File file, CallType ct) throws IOException {
+    public String ApiRequestMultipart(String server, File[] files, CallType ct) throws IOException {
 
         OkHttpClient client = new OkHttpClient();
-        System.out.println(file.getAbsolutePath());
-        System.out.println(file.getName());
-        RequestBody formBody = RequestBody.create(MediaType.parse("image/png"), file);
+//        System.out.println(file.getAbsolutePath());
+//        System.out.println(file.getName());
 //        MultipartBody.Part filePart = MultipartBody.Part.createFormData("media", "document.jpeg", formBody);
         Request.Builder rb  = new Request.Builder().url(server);
         if(application.getToken() != null) rb.header("Authorization","BEARER "+application.getToken());
-        RequestBody requestBody = new MultipartBody.Builder()
-                .setType(MediaType.parse("multipart/form-data"))
-                .addFormDataPart("media","document.png", formBody)
-                .build();
+        MultipartBody.Builder builder = new MultipartBody.Builder()
+                .setType(MediaType.parse("multipart/form-data"));
+        for(int i=0;i< files.length; i++){
+            RequestBody formBody = RequestBody.create(MediaType.parse("image/png"), files[i]);
+            builder.addFormDataPart("media","document_"+i+".png", formBody);
+        };
+
+        RequestBody requestBody = builder.build();
         Request request;
         if(ct == CallType.POST) request = rb.post(requestBody).build();
         else if(ct == CallType.PUT) request = rb.put(requestBody).build();

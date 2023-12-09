@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Aplicondo Guard</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
+    <string name="title_home">Visitor Check In</string>
+    <string name="title_dashboard"></string>
     <string name="scan_btn">Scan Visitor QR</string>
     <string name="guard_string">Guard</string>
     <string name="walk_in_btn">Walk In</string>
@@ -9,7 +9,7 @@
     <string name="invalid_qr_error">Invalid QR code</string>
     <string name="expired_qr_error">This pass is expired</string>
     <string name="no_visitor_error">No Visitor pass found. This pass might be delete by the resident.</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_settings">Settings</string>
     <string name="title_activity_main">MainActivity</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
@@ -59,4 +59,12 @@
     <string name="scan_qr_desc">Scan a qr code to enable the visitor to check in</string>
     <string name="manually_visitor_details">Manually enter visitor details</string>
     <string name="submit">Submit</string>
+    <string name="visitor_list_label">Visitor List</string>
+    <string name="emergency_list_label">Emergencies</string>
+    <string name="report_list_label">Report</string>
+    <string name="old_password">Current Password</string>
+    <string name="new_password">New Password</string>
+    <string name="confrim_new_password">Confirm New Password</string>
+    <string name="change_password">Change Password</string>
+    <string name="unit_no">Unit No</string>
 </resources>

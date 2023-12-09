@@ -5,53 +5,47 @@ import android.util.Log;
 import java.util.Locale;
 import java.util.Objects;
 
-public class VisitUpdateRequest extends RequestBase {
+public class SOSUpdateRequest extends RequestBase {
 
-    private final String prefix;
+    private String prefix;
 
-    VisitUpdateResult res;
+    SOSUpdateResult res;
 
-    public enum Status {
-        ARRIVED,
-        GUARD_REJECTED,
+    int report_id;
 
-    }
-
-    Status sts;
-
-    public VisitUpdateRequest(int visit_id, Status status, VisitUpdateResult res){
-        sts = status;
+    public SOSUpdateRequest(int id, int reportId, SOSUpdateResult res){
+        this.report_id = reportId;
+        this.prefix = String.format(Locale.ENGLISH,"/guard/sos/%d", id);
         this.res = res;
-        this.prefix = String.format(Locale.ENGLISH,"/visitor/visit/%d",visit_id );
     }
 
 
-    public class VisitUpdateReq {
-        String status = String.valueOf(sts);
+    public class SOSUpdateReq {
+        int reported_id = report_id;
     }
 
-    public static class VisitUpdateRes{
+    public static class SOSUpdateRes{
         public Boolean success;
         public APIError error;
-        public VisitorCheckInRequest.Visitor data;
     }
 
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
+        Log.e("-sos-", "onPostExecute: "+s );
         if(s.length() < 1) {
-            VisitUpdateRequest.VisitUpdateRes rs = new VisitUpdateRequest.VisitUpdateRes();
+            SOSUpdateRequest.SOSUpdateRes rs = new SOSUpdateRequest.SOSUpdateRes();
             rs.success = false;
             rs.error = ServerLost;
             res.get(rs);
         }
         else {
             try {
-                VisitUpdateRequest.VisitUpdateRes rs = g.fromJson(s, VisitUpdateRequest.VisitUpdateRes.class);
+                SOSUpdateRequest.SOSUpdateRes rs = g.fromJson(s, SOSUpdateRequest.SOSUpdateRes.class);
                 res.get(rs);
             }catch (Exception e){
                 Log.e("API error", Objects.requireNonNull(e.getMessage()));
-                VisitUpdateRequest.VisitUpdateRes rs = new VisitUpdateRequest.VisitUpdateRes();
+                SOSUpdateRequest.SOSUpdateRes rs = new SOSUpdateRequest.SOSUpdateRes();
                 rs.success = false;
                 rs.error = new APIError();
                 rs.error.code = 888;
@@ -64,10 +58,8 @@ public class VisitUpdateRequest extends RequestBase {
 
     @Override
     protected String doInBackground(Void... voids) {
-        String data = g.toJson(new VisitUpdateRequest.VisitUpdateReq());
-        LOG("walkin", data);
+        String data = g.toJson(new SOSUpdateRequest.SOSUpdateReq());
         String url = server + prefix;
-        LOG("walkin", url);
         return Request(data, url , CallType.PUT);
     }
 }

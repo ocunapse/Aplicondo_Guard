@@ -3,15 +3,17 @@ package com.ocunapse.aplicondo.guard.api;
 
 import android.util.Log;
 
+import java.util.Date;
+import java.util.Locale;
+
 public class VisitorCheckInRequest extends RequestBase {
 
-    private final static String prefix = "/visitor/visit/";
+    private final String prefix ;
     VisitorResult res;
-    int visitorId;
 
     public VisitorCheckInRequest(int visitorId, VisitorResult res) {
         this.res = res;
-        this.visitorId = visitorId;
+        this.prefix = String.format(Locale.ENGLISH,"/visitor/visit/%d/",visitorId );
     }
 
     public static class Profile {
@@ -30,7 +32,8 @@ public class VisitorCheckInRequest extends RequestBase {
         public int profile_id;
         public String name;
         public String mobile_number;
-        public String visit_date;
+        public Date visit_date;
+        public Date end_date;
         public String vehicle_registration;
         public String category;
         public String transport;
@@ -38,6 +41,7 @@ public class VisitorCheckInRequest extends RequestBase {
         public String dropoff_location;
         public String schedule;
         public String weekdays;
+        public String reasonForVisit;
         public String status;
         public Profile profile;
         public UnitListRequest.Unit unit;
@@ -60,7 +64,6 @@ public class VisitorCheckInRequest extends RequestBase {
         }
         else {
             try {
-//                Log.i("get resp", s);
                 VisitorRes rs = g.fromJson(s, VisitorRes.class);
                 res.get(rs);
             }catch (Exception e){
@@ -79,7 +82,7 @@ public class VisitorCheckInRequest extends RequestBase {
 
     @Override
     protected String doInBackground(Void... voids) {
-        return Request(null, server + prefix + visitorId, CallType.GET);
+        return Request(null, server + prefix , CallType.GET);
     }
 
 }

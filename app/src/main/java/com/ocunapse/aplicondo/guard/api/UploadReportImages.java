@@ -1,30 +1,29 @@
 package com.ocunapse.aplicondo.guard.api;
 
-import android.graphics.Bitmap;
 import android.util.Log;
 
 import java.io.File;
 import java.util.Locale;
 
-public class UploadImage extends RequestBase {
+public class UploadReportImages extends RequestBase {
     private final String prefix ;
-    UploadImageResult res;
-    File file;
+    UploadReportImageResult res;
+    File[] file;
 
-    public UploadImage(int unit_id, int profile_id, File file, UploadImageResult res) {
+    public UploadReportImages( File[] file, UploadReportImageResult res) {
         this.res = res;
         this.file = file;
-        this.prefix = String.format(Locale.ENGLISH,"/visitor/%d/%d/uploadImage",unit_id, profile_id );
+        this.prefix = String.format(Locale.ENGLISH,"/guards/%d/uploadAttachment", application.getSite());
     }
 
-    public class ImageData{
-        public String url;
+    public static class ImagesData{
+        public String[] url;
     }
 
-    public static class UploadImageRes{
+    public static class UploadReportImgRes{
         public Boolean success;
         public APIError error;
-        public ImageData data;
+        public ImagesData data;
     }
 
 
@@ -33,18 +32,18 @@ public class UploadImage extends RequestBase {
         super.onPostExecute(s);
         LOG("walkin",s);
         if(s.length() < 1) {
-            UploadImageRes rs = new UploadImageRes();
+            UploadReportImgRes rs = new UploadReportImgRes();
             rs.success = false;
             rs.error = ServerLost;
             res.get(rs);
         }
         else {
             try {
-                UploadImageRes rs = g.fromJson(s, UploadImageRes.class);
+                UploadReportImgRes rs = g.fromJson(s, UploadReportImgRes.class);
                 res.get(rs);
             }catch (Exception e){
                 Log.e("API error", e.getMessage());
-                UploadImageRes rs = new UploadImageRes();
+                UploadReportImgRes rs = new UploadReportImgRes();
                 rs.success = false;
                 rs.error = new APIError();
                 rs.error.code = 888;
@@ -58,8 +57,7 @@ public class UploadImage extends RequestBase {
     @Override
     protected String doInBackground(Void... voids) {
         String url = server + prefix;
-        File[] files = new File[]{file};
-        return RequestMultipart(files, url, CallType.POST);
+        return RequestMultipart(file, url, CallType.POST);
     }
 
 }

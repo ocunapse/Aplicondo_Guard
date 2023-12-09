@@ -1,5 +1,6 @@
 package com.ocunapse.aplicondo.guard.ui.dashboard;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,14 +19,25 @@ public class DashboardFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        DashboardViewModel dashboardViewModel =
-                new ViewModelProvider(this).get(DashboardViewModel.class);
 
         binding = FragmentDashboardBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textDashboard;
-        dashboardViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        binding.visitorListBtn.setOnClickListener(view -> {
+            view.setEnabled(false);
+            startActivity(new Intent(requireActivity(), VisitorListActivity.class));
+        });
+
+        binding.emerListBtn.setOnClickListener(view -> {
+            view.setEnabled(false);
+            startActivity(new Intent(requireActivity(), EmergencyListActivity.class));
+        });
+
+        binding.reportListBtn.setOnClickListener(view -> {
+            view.setEnabled(false);
+            startActivity(new Intent(requireActivity(), ReportActivity.class));
+        });
+
         return root;
     }
 
@@ -33,5 +45,13 @@ public class DashboardFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        binding.emerListBtn.setEnabled(true);
+        binding.visitorListBtn.setEnabled(true);
+        binding.reportListBtn.setEnabled(true);
     }
 }

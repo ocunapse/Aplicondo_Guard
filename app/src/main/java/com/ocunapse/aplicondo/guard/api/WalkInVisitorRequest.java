@@ -5,15 +5,14 @@ import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
 
 public class WalkInVisitorRequest extends RequestBase {
 
-    private final static String prefix = "/visitor/";
+    private final String prefix;
 
-    int unit_id;
-    int profile_id;
 
     WalkInResult res;
     String Name;
@@ -33,22 +32,21 @@ public class WalkInVisitorRequest extends RequestBase {
         TimeZone malaysianTimeZone = TimeZone.getTimeZone("Asia/Kuala_Lumpur");
         SimpleDateFormat start = new SimpleDateFormat("yyyy/MM/dd 00:00:01 z");
         start.setTimeZone(malaysianTimeZone);
-        SimpleDateFormat end = new SimpleDateFormat("yyyy/MM/dd 23:59:00 z");
+        SimpleDateFormat end = new SimpleDateFormat("yyyy/MM/dd 23:59:50 z");
         end.setTimeZone(malaysianTimeZone);
-        this.unit_id = unit_id;
-        this.profile_id = profile_id;
         this.Name = name;
         this.mobNum = mobile_number;
-        this.plateNum = transport == Transport.WALK_IN ? vehicle_registration : null;
+        this.plateNum = transport == Transport.WALK_IN ? null : vehicle_registration;
         this.transports = transport.toString();
         this.visitDate = start.format(new Date(visit_date));
         this.endDate = end.format(new Date(visit_date));
         this.image_url = image;
         Log.d("walkin",visit_date + " --- " + this.visitDate +" ---- " +endDate);
         this.res = res;
+        this.prefix = String.format(Locale.ENGLISH,"/visitor/%d/%d/createVisit",unit_id,profile_id );
     }
 
-      class WalkInReq{
+    class WalkInReq{
         String name = Name;
         String mobile_number = mobNum;
         String visit_date = visitDate;
@@ -70,7 +68,7 @@ public class WalkInVisitorRequest extends RequestBase {
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-        Log.d("walkin", s);
+        LOG("walkin", s);
         if(s.length() < 1) {
             WalkInRes rs = new WalkInRes();
             rs.success = false;
@@ -98,9 +96,9 @@ public class WalkInVisitorRequest extends RequestBase {
     @Override
     protected String doInBackground(Void... voids) {
         String data = g.toJson(new WalkInReq());
-        Log.d("walkin", data);
-        String url = server + prefix + unit_id + "/" + profile_id + "/createVisit";
-        Log.d("walkin", url);
+        LOG("walkin", data);
+        String url = server + prefix;
+        LOG("walkin", url);
         return Request(data, url , CallType.POST);
     }
 

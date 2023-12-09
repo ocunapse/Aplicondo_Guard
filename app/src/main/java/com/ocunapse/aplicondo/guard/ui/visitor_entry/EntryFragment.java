@@ -1,5 +1,6 @@
 package com.ocunapse.aplicondo.guard.ui.visitor_entry;
 
+import static com.ocunapse.aplicondo.guard.api.RequestBase.LOG;
 import static com.ocunapse.aplicondo.guard.util.GeneralComponent.AlertBox;
 import static com.ocunapse.aplicondo.guard.util.StringUtil.hmacWithJava;
 
@@ -7,6 +8,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,29 +22,33 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.google.android.material.snackbar.Snackbar;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
 import com.ocunapse.aplicondo.guard.R;
+import com.ocunapse.aplicondo.guard.api.VisitUpdateRequest;
 import com.ocunapse.aplicondo.guard.api.VisitorCheckInRequest;
 import com.ocunapse.aplicondo.guard.barcode.ScannerActivity;
 import com.ocunapse.aplicondo.guard.databinding.FragmentEntryBinding;
 import com.ocunapse.aplicondo.guard.ui.WalkInActivity;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
+import java.util.TimeZone;
+
+
 
 public class EntryFragment extends Fragment {
     private FragmentEntryBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        EntryViewModel entryViewModel =
-                new ViewModelProvider(this).get(EntryViewModel.class);
-
         binding = FragmentEntryBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-
-        final ImageButton scanBtn = binding.scanQrBtn;
-        final ImageButton walkinBtn = binding.walkInBtn;
 
         ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -54,11 +60,13 @@ public class EntryFragment extends Fragment {
                     }
                 });
 
-        scanBtn.setOnClickListener(view -> {
+        binding.scanQrBtn.setOnClickListener(view -> {
+            view.setEnabled(false);
             activityResultLauncher.launch(new Intent(getActivity(), ScannerActivity.class));
         });
 
-        walkinBtn.setOnClickListener(view -> {
+        binding.walkInBtn.setOnClickListener(view -> {
+            view.setEnabled(false);
             Intent i = new Intent(getActivity(), WalkInActivity.class);
             startActivity(i);
         });
@@ -74,7 +82,12 @@ public class EntryFragment extends Fragment {
         binding = null;
     }
 
-
+    @Override
+    public void onResume() {
+        super.onResume();
+        binding.scanQrBtn.setEnabled(true);
+        binding.walkInBtn.setEnabled(true);
+    }
 
     /****
      * REQUEST QR Scanner
@@ -114,8 +127,9 @@ public class EntryFragment extends Fragment {
         return res;
     }
 
-    private void VisitorDialog(VisitorCheckInRequest.Visitor visitor){
-        final Dialog dialog = new Dialog(this.requireActivity());
+    public static void VisitorDialog(VisitorCheckInRequest.Visitor visitor, Activity activity, SwipeRefreshLayout.OnRefreshListener listner){
+        PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.getInstance();
+        final Dialog dialog = new Dialog(activity);
         dialog.setContentView(R.layout.dialog_visitor);
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
@@ -131,11 +145,37 @@ public class EntryFragment extends Fragment {
         vehicle.setText(visitor.vehicle_registration == null ? "-":visitor.vehicle_registration);
         unit.setText(visitor.unit.unit_label);
         resident.setText(visitor.profile.full_name);
-        resident_phone.setText(visitor.profile.phone_number);
+        resident_phone.setText(" \uD83D\uDCDE " + visitor.profile.phone_number  );
+
+        resident_phone.setOnClickListener(view -> {
+            try {
+                Phonenumber.PhoneNumber number = phoneNumberUtil.parse(visitor.profile.phone_number, "MY");
+                LOG("scan_val", number.toString());
+                if(phoneNumberUtil.isValidNumber(number)) {
+                    Intent intent = new Intent(Intent.ACTION_DIAL);
+                    intent.setData(Uri.parse("tel:" + phoneNumberUtil.format(number, PhoneNumberUtil.PhoneNumberFormat.NATIONAL)));
+                    activity.startActivity(intent);
+                }
+                else Snackbar.make(view,"Invalid Phone Number", Snackbar.LENGTH_LONG).show();
+            }catch (Exception ignored){
+                System.out.println(ignored.getMessage());
+                Snackbar.make(view,"Invalid Phone Number", Snackbar.LENGTH_LONG).show();
+            }
+
+        });
 
         Button proceed =  dialog.findViewById(R.id.visitor_verified_btn);
+        Button reject =  dialog.findViewById(R.id.visitor_reject_btn);
 
-        proceed.setOnClickListener(view -> dialog.dismiss());
+        proceed.setOnClickListener(view -> new VisitUpdateRequest(visitor.id, VisitUpdateRequest.Status.ARRIVED, res ->{
+            dialog.dismiss();
+            if(listner != null) listner.onRefresh();
+        }).execute());
+        reject.setOnClickListener(view -> new VisitUpdateRequest(visitor.id, VisitUpdateRequest.Status.GUARD_REJECTED, res -> {
+            dialog.dismiss();
+            if(listner != null) listner.onRefresh();
+        }).execute());
+        dialog.findViewById(R.id.close_btn_visitor_dialog).setOnClickListener(view -> dialog.dismiss());
         dialog.show();
     }
 
@@ -165,15 +205,42 @@ public class EntryFragment extends Fragment {
                     Date n = new Date();
                     Date e = new Date(end);
                     Log.d("scan_val : Now", String.valueOf(n.getTime()));
-                    if(n.getTime() > e.getTime()){
-                        pd.dismiss();
-                        AlertBox(getContext(),getString(R.string.expired_qr_error));
-                        return;
-                    }
+//                    if(n.getTime() > e.getTime()){
+//                        pd.dismiss();
+//                        AlertBox(getContext(),getString(R.string.expired_qr_error));
+//                        return;
+//                    }
                     VisitorCheckInRequest vci = new VisitorCheckInRequest(visitorId, res -> {
                         if(res.success) {
                             pd.dismiss();
-                            VisitorDialog(res.data);
+                            LOG("visitData",res.data.visit_date.toString());
+                            TimeZone malaysianTimeZone = TimeZone.getTimeZone("Asia/Kuala_Lumpur");
+                            SimpleDateFormat Mrg = new SimpleDateFormat("yyyy/MM/dd 00:00:01 z");
+                            SimpleDateFormat Nig = new SimpleDateFormat("yyyy/MM/dd 23:59:50 z");
+                            Mrg.setTimeZone(malaysianTimeZone);
+                            Nig.setTimeZone(malaysianTimeZone);
+                            Date now = new Date();
+                            Date todayMorning = new Date(Mrg.format(now));
+                            Date todayNight = new Date(Nig.format(now));
+                            Date endNight = new Date(Nig.format(res.data.end_date != null ? res.data.end_date :now));
+                            LOG("visitData t-Mrg",todayMorning.toString());
+                            LOG("visitData t-Nig",todayNight.toString());
+                            LOG("visitData",now.toString());
+                            if(todayMorning.compareTo(res.data.visit_date) >= 0){
+                                Log.e("visitData", "a day - b4");
+                                AlertBox(getContext(),"Visitor Pass expired");
+                            }else {
+                                if(res.data.visit_date.compareTo(todayNight) >= 0){
+                                    Log.e("visitData", "a day-AF");
+                                    AlertBox(getContext(),"Visitor Pass Not Valid for today");
+                                }else {
+                                    if(res.data.visit_date.compareTo(todayMorning) >= 0 && res.data.visit_date.compareTo(todayNight) <= 0) {
+                                        Log.e("visitData", "tod - "+ endNight);
+                                        VisitorDialog(res.data,this.getActivity(), null);
+                                    }
+                                }
+                            }
+//
                         }
                         else {
                             pd.dismiss();
@@ -187,14 +254,15 @@ public class EntryFragment extends Fragment {
                 }
             } catch (Exception e) {
                 Log.e("scan_val", Objects.requireNonNull(e.getMessage()));
+                AlertBox(getContext(),getString(R.string.invalid_qr_error));
                 pd.dismiss();
             }
         }catch (Exception e){
             Log.e("scan_val", Arrays.toString(e.getStackTrace()));
             pd.dismiss();
-            if(e instanceof ArrayIndexOutOfBoundsException){
+//            if(e instanceof ArrayIndexOutOfBoundsException){
                 AlertBox(getContext(), R.string.invalid_qr_error);
-            }
+//            }
         }
     }
 

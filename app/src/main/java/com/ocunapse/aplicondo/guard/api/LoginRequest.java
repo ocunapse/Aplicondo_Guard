@@ -3,6 +3,8 @@ package com.ocunapse.aplicondo.guard.api;
 
 import android.util.Log;
 
+import java.util.Objects;
+
 public class LoginRequest extends RequestBase {
 
     private static String prefix = "/login";
@@ -19,6 +21,7 @@ public class LoginRequest extends RequestBase {
      class LoginReq{
         String userId    = usrname;
         String password  = pswd;
+        String mana_tu = "guard";
     }
 
 
@@ -54,14 +57,14 @@ public class LoginRequest extends RequestBase {
         }
         else {
             try {
-//                Log.i("get resp", s);
+//                Log.i("login resp", s);
                 LoginRes rs = g.fromJson(s, LoginRes.class);
                 if(rs.success){
                     application.setSite(rs.user.siteId);
                 }
                 res.get(rs);
             }catch (Exception e){
-                Log.e("API error", e.getMessage());
+                Log.e("API error", Objects.requireNonNull(e.getMessage()));
                 LoginRes rs = new LoginRes();
                 rs.success = false;
                 rs.error = new APIError();

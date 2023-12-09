@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:layout_margin="5dp"
+    android:outlineAmbientShadowColor="#A8A8A8"
+    android:outlineSpotShadowColor="#8E8E8E"
+    app:cardBackgroundColor="#E6E6E6"
+    app:cardCornerRadius="8dp"
+    app:cardPreventCornerOverlap="true"
+    app:circularflow_defaultRadius="4dp"
+    app:contentPadding="8dp"
+    app:layout_constraintCircleRadius="6dp"
+    tools:cardCornerRadius="4dp"
+    app:cardElevation="6dp"
+    tools:cardUseCompatPadding="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="6dp"
+        android:paddingVertical="3dp"
+        android:weightSum="5">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginRight="8dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView10"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Name" />
+
+            <TextView
+                android:id="@+id/textView14"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Unit" />
+
+            <TextView
+                android:id="@+id/vNumHead"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Vehicle No" />
+
+            <TextView
+                android:id="@+id/textView17"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Visit Type" />
+
+            <TextView
+                android:id="@+id/vPurposeHead"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Visit Purpose" />
+
+            <TextView
+                android:id="@+id/textView18"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Time" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="4"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/visitor_item_name_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="TextView" />
+
+            <TextView
+                android:id="@+id/visitor_item_unit_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="TextView" />
+
+            <TextView
+                android:id="@+id/visitor_item_vehicle_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="TextView" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="bottom">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="top"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/visitor_item_visit_type_tv"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="TextView" />
+
+                    <TextView
+                        android:id="@+id/visitor_item_purpose_tv"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="TextView" />
+
+                    <TextView
+                        android:id="@+id/visitor_item_time_tv"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="TextView" />
+                </LinearLayout>
+
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+
+                <Button
+                    android:id="@+id/status_lbl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/rounded_button"
+                    android:backgroundTint="#307539"
+                    android:clickable="false"
+                    android:contextClickable="false"
+                    android:linksClickable="false"
+                    android:longClickable="false"
+                    android:maxWidth="120dp"
+                    android:paddingHorizontal="8dp"
+                    android:text="ARRIVED"
+                    android:textColor="#FFFFFF"
+                    android:textColorHighlight="#D3B912"
+                    android:theme="@style/Widget.AppCompat.Button.Colored"
+                    app:cornerRadius="36dp"
+                    app:toggleCheckedStateOnClick="false" />
+
+                <Button
+                    android:id="@+id/check_in_visitor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#307539"
+                    android:paddingHorizontal="8dp"
+                    android:text="Check-In"
+                    android:textColor="#FFFFFF"
+                    android:textColorHighlight="#D3B912"
+                    app:cornerRadius="16dp" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

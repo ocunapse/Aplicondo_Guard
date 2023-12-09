@@ -1,7 +1,10 @@
 package com.ocunapse.aplicondo.guard;
 
+import static com.ocunapse.aplicondo.guard.api.RequestBase.LOG;
+
 import android.annotation.SuppressLint;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -16,7 +19,12 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowInsets;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.ocunapse.aplicondo.guard.api.PushTokenUpdateRequest;
 import com.ocunapse.aplicondo.guard.databinding.ActivitySplashBinding;
 
 /**
@@ -121,7 +129,22 @@ public class SplashActivity extends AppCompatActivity {
         mContentView = binding.fullscreenContent;
 
 
-        new CountDownTimer(3000, 1000) {
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.w("-token-", "Fetching FCM registration token failed", task.getException());
+                        return;
+                    }
+
+                    // Get new FCM registration token
+                    String token = task.getResult();
+                    String old = application.getPushToken();
+                    LOG("-token-", String.format("Is different ? - %s",!token.equals(old)));
+                    application.updatePushToken(token);
+                });
+
+
+        new CountDownTimer(2000, 1000) {
             public void onFinish() {
                 Intent i;
                 if(application.getToken() != null) {

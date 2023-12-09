@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "435811848476",
+    "project_id": "aplicondo",
+    "storage_bucket": "aplicondo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:435811848476:android:641806163914e636f16ad9",
+        "android_client_info": {
+          "package_name": "com.ocunapse.aplicondo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8Rq89CGnqc82cBERh2UHXpq2_blmCNbk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:435811848476:android:1d9fadca78bd365cf16ad9",
+        "android_client_info": {
+          "package_name": "com.ocunapse.aplicondo.guard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8Rq89CGnqc82cBERh2UHXpq2_blmCNbk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,11 +1,14 @@
 package com.ocunapse.aplicondo.guard.ui;
 
 import static android.Manifest.permission_group.CAMERA;
+import static android.Manifest.permission_group.READ_MEDIA_AURAL;
+import static android.os.Environment.getExternalStorageDirectory;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,6 +21,7 @@ import android.graphics.Typeface;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.text.Editable;
@@ -37,6 +41,7 @@ import com.google.i18n.phonenumbers.Phonenumber;
 import com.ocunapse.aplicondo.guard.api.UnitListRequest;
 
 import com.ocunapse.aplicondo.guard.api.UploadImage;
+import com.ocunapse.aplicondo.guard.api.VisitUpdateRequest;
 import com.ocunapse.aplicondo.guard.api.WalkInVisitorRequest;
 import com.ocunapse.aplicondo.guard.databinding.ActivityWalkInBinding;
 
@@ -104,7 +109,9 @@ public class WalkInActivity extends AppCompatActivity {
 
         final String[] unitLabel = new String[1];
 
-        permissionsToRequest.add(CAMERA);
+        permissionsToRequest.add("android.permission.CAMERA");
+        permissionsToRequest.add("android.permission.READ_MEDIA_IMAGES");
+        permissionsToRequest.add("android.permission.READ_EXTERNAL_STORAGE");
         permissionsToRequest.size();
         requestPermissions(permissionsToRequest.toArray(new String[permissionsToRequest.size()]), ALL_PERMISSIONS_RESULT);
 
@@ -224,10 +231,13 @@ public class WalkInActivity extends AppCompatActivity {
 
 
         binding.cameraButton.setOnClickListener(view -> {
+
             startActivityForResult(getPickImageChooserIntent(), 200);
         });
 
         binding.submitWalkin.setOnClickListener(view -> {
+            ProgressDialog pd = ProgressDialog.show(this,"",
+                    "Loading. Please wait...", true);
             boolean hasError = verify().length() > 0;
             String nameVal = name.getText().toString();
             String phoneVal = phone.getText().toString();
@@ -257,9 +267,24 @@ public class WalkInActivity extends AppCompatActivity {
                     String image = null;
                     if(Ures.success) image = Ures.data.url;
                     new WalkInVisitorRequest(unit_id, resident_id, nameVal,phoneVal,vnumVal,transport,time, image, res -> {
+                        pd.dismiss();
                         if(res.success) {
+                            new VisitUpdateRequest(res.data.id, VisitUpdateRequest.Status.ARRIVED, updateRes -> {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                                String alertMsg = "Visitor Record Added";
+                                if(!updateRes.success) alertMsg = "Visitor Registered. Arrival Update failed";
+                                builder.setMessage(alertMsg)
+                                        .setCancelable(false)
+                                        .setPositiveButton("OK", (dialog, id) -> {
+                                            dialog.dismiss();
+                                            finish();
+                                        });
+                                builder.create().show();
+                            }).execute();
+                        }else {
                             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                            builder.setMessage("Record Added")
+                            builder.setMessage("Visitor Register Failed")
+                                    .setCancelable(false)
                                     .setPositiveButton("OK", (dialog, id) -> {
                                         dialog.dismiss();
                                         finish();
@@ -271,6 +296,7 @@ public class WalkInActivity extends AppCompatActivity {
 
             }
             else {
+                pd.dismiss();
                 Snackbar.make(view,verify(),Snackbar.LENGTH_LONG).show();
             }
 
@@ -364,11 +390,11 @@ public class WalkInActivity extends AppCompatActivity {
     /**
      * Get URI to image received from capture by camera.
      */
-    private Uri getCaptureImageOutputUri() {
+    public static Uri getCaptureImageOutputUri() {
         Uri outputFileUri = null;
-        File getImage = getExternalCacheDir();
+        File getImage = new File(Environment.getExternalStorageDirectory(), "profile.png");
         if (getImage != null) {
-            outputFileUri = Uri.fromFile(new File(getImage.getPath(), "profile.png"));
+            outputFileUri = Uri.fromFile(getImage);
         }
         return outputFileUri;
     }
@@ -380,18 +406,17 @@ public class WalkInActivity extends AppCompatActivity {
      *
      * @param data the returned data of the activity result
      */
-    public Uri getPickImageResultUri(Intent data) {
+    public static Uri getPickImageResultUri(Intent data) {
         boolean isCamera = true;
+        System.out.println(data);
         if (data != null) {
             String action = data.getAction();
             isCamera = action != null && action.equals(MediaStore.ACTION_IMAGE_CAPTURE);
         }
-
-
         return isCamera ? getCaptureImageOutputUri() : data.getData();
     }
 
-    private static Bitmap rotateImageIfRequired(Bitmap img, Uri selectedImage) throws IOException {
+    public static Bitmap rotateImageIfRequired(Bitmap img, Uri selectedImage) throws IOException {
 
         ExifInterface ei = new ExifInterface(selectedImage.getPath());
         int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
@@ -416,7 +441,7 @@ public class WalkInActivity extends AppCompatActivity {
         return rotatedImg;
     }
 
-    public Bitmap getResizedBitmap(Bitmap image, int maxSize) {
+    public static Bitmap getResizedBitmap(Bitmap image, int maxSize) {
         int width = image.getWidth();
         int height = image.getHeight();
 
@@ -435,13 +460,15 @@ public class WalkInActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Bitmap bitmap;
-        if (resultCode == Activity.RESULT_OK) {
+
+        Log.e("ss-d", "onActivityResult: "+ getPickImageResultUri(data));
+        if (resultCode == Activity.RESULT_OK && getPickImageResultUri(data) != null) {
 
             ImageView imageView = binding.documentView;
 
+            Log.e("ss-d", "onActivityResult: "+ getCaptureImageOutputUri());
             if (getPickImageResultUri(data) != null) {
                 picUri = getPickImageResultUri(data);
-
                 try {
                     myBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), picUri);
                     myBitmap = rotateImageIfRequired(myBitmap, picUri);
@@ -452,19 +479,22 @@ public class WalkInActivity extends AppCompatActivity {
                     binding.cameraButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.MATCH_PARENT ));
 
                 } catch (IOException e) {
+                    Log.e("ss-d", "onActivityResult: ",e );
                     e.printStackTrace();
                 }
 
 
             } else {
 
-
                 bitmap = (Bitmap) data.getExtras().get("data");
 
                 myBitmap = bitmap;
-
+                Log.e("ss-d", "onActivityResult: "+ bitmap);
+                assert myBitmap != null;
+                myBitmap = getResizedBitmap(myBitmap, 500);
                 imageView.setImageBitmap(myBitmap);
-
+                binding.documentView.setVisibility(View.VISIBLE);
+                binding.cameraButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.MATCH_PARENT ));
             }
 
         }
