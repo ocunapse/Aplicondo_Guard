@@ -1,23 +1,28 @@
 package com.ocunapse.aplicondo.guard.barcode;
 
+import static com.google.mlkit.vision.barcode.common.Barcode.FORMAT_AZTEC;
+import static com.google.mlkit.vision.barcode.common.Barcode.FORMAT_QR_CODE;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.Image;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageProxy;
+
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.mlkit.vision.barcode.BarcodeScanner;
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.barcode.common.Barcode;
 import com.google.mlkit.vision.common.InputImage;
-import com.ocunapse.aplicondo.guard.api.LoginRequest;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
 
@@ -51,12 +56,16 @@ public final class QrCodeAnalyzer implements ImageAnalysis.Analyzer {
             this.scaleY = this.previewViewHeight / (float)img.getWidth();
 
             InputImage inputImage = InputImage.fromMediaImage(img, image.getImageInfo().getRotationDegrees());
-            BarcodeScannerOptions options = new BarcodeScannerOptions.Builder()
-                    .setBarcodeFormats(
-                            Barcode.FORMAT_QR_CODE,
-                            Barcode.FORMAT_AZTEC)
-                    .build();
+            BarcodeScannerOptions options =
+                    new BarcodeScannerOptions.Builder()
+                            .setBarcodeFormats(
+                                   FORMAT_QR_CODE,
+                                    FORMAT_AZTEC)
+                            .build();
             BarcodeScanner scanner = BarcodeScanning.getClient(options);
+//            FirebaseVisionBarcodeDetector detector = FirebaseVision.getInstance()
+//                    .getVisionBarcodeDetector(options);
+
             scanner.process(inputImage).addOnSuccessListener(new OnSuccessListener() {
 
                 public void onSuccess(Object var1) {
@@ -79,6 +88,38 @@ public final class QrCodeAnalyzer implements ImageAnalysis.Analyzer {
 
                 }
             });
+
+
+//            Task<List<FirebaseVisionBarcode>> result = detector.detectInImage(inputImage)
+//                    .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionBarcode>>() {
+//                        @Override
+//                        public void onSuccess(List<FirebaseVisionBarcode> barcodes) {
+//                            if (!barcodes.isEmpty()) {
+//                        barcodes.forEach(barcode -> {
+//                            if (barcode.getBoundingBox() != null) {
+//                                barcodeBoxView.setRect(adjustBoundingRect(barcode.getBoundingBox()));
+//                            }
+//                            scanResult.get(barcode.getRawValue());
+//                            try {
+//                                detector.close();
+//                            } catch (IOException e) {
+//                                Log.e("scan_val", "onSuccess: ", e);
+//                            }
+//                        });
+//
+//                    } else {
+//                        QrCodeAnalyzer.this.barcodeBoxView.setRect(new RectF());
+//                    }
+//                        }
+//                    })
+//                    .addOnFailureListener(new OnFailureListener() {
+//                        @Override
+//                        public void onFailure(@NonNull Exception e) {
+//                            // Task failed with an exception
+//                            // ...
+//                        }
+//                    });
+
         }
 
         image.close();

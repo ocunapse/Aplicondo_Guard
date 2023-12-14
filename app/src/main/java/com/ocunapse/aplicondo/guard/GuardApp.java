@@ -42,9 +42,17 @@ public class GuardApp extends Application {
     public void updatePushToken(String pushToken) {
         if(getToken() == null) return;
         String old = getPushToken();
-        boolean replace = !old.equals(pushToken);
+        boolean replace;
+        if(old == null) replace = false;
+        else replace = !old.equals(pushToken);
+        LOG("-token- O", String.valueOf(old));
+        LOG("-token- N", String.valueOf(pushToken));
         new PushTokenUpdateRequest(pushToken, replace, res -> {
-            if(res.success) LOG("-token-", "Updated at G-App");
+            LOG("-token-", "Updated at G-App Success = " + String.valueOf(res.success));
+            if(res.success) {
+                setPushToken(pushToken);
+                LOG("-token-", "Updated at G-App");
+            }
         }).execute();
     }
 

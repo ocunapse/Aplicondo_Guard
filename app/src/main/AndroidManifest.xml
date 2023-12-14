@@ -22,6 +22,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
     <application
@@ -41,22 +42,28 @@
         tools:targetApi="31">
         <activity
             android:name=".ui.dashboard.EmergencyListActivity"
+            android:screenOrientation="sensorPortrait"
             android:exported="false" />
         <activity
             android:name=".ui.dashboard.SOSActivity"
+            android:screenOrientation="sensorPortrait"
             android:exported="false" />
         <activity
             android:name=".ui.dashboard.ReportActivity"
+            android:screenOrientation="sensorPortrait"
             android:exported="false" />
         <activity
             android:name=".ui.dashboard.VisitorListActivity"
+            android:screenOrientation="sensorPortrait"
             android:exported="false" />
         <activity
             android:name=".ui.settings.ChangePasswordActivity"
+            android:screenOrientation="sensorPortrait"
             android:exported="false"
             android:label="@string/change_password" />
         <activity
             android:name=".barcode.ScannerActivity"
+            android:screenOrientation="sensorPortrait"
             android:exported="false" />
         <activity
             android:name=".SplashActivity"
@@ -72,6 +79,7 @@
         </activity>
         <activity
             android:name=".ui.WalkInActivity"
+            android:screenOrientation="sensorPortrait"
             android:exported="false" />
         <activity
             android:name=".LoginActivity"
@@ -90,6 +98,10 @@
         <meta-data
             android:name="com.google.mlkit.vision.DEPENDENCIES"
             android:value="barcode_ui" />
+        <activity
+            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+            android:screenOrientation="sensorPortrait"
+            tools:replace="screenOrientation" />
 
         <service
             android:name=".firebase.FirebaseMessageService"

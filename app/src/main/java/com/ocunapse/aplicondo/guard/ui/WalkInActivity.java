@@ -4,6 +4,8 @@ import static android.Manifest.permission_group.CAMERA;
 import static android.Manifest.permission_group.READ_MEDIA_AURAL;
 import static android.os.Environment.getExternalStorageDirectory;
 
+import static com.ocunapse.aplicondo.guard.api.RequestBase.LOG;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -24,6 +26,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -49,6 +52,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -112,6 +116,7 @@ public class WalkInActivity extends AppCompatActivity {
         permissionsToRequest.add("android.permission.CAMERA");
         permissionsToRequest.add("android.permission.READ_MEDIA_IMAGES");
         permissionsToRequest.add("android.permission.READ_EXTERNAL_STORAGE");
+        permissionsToRequest.add("android.settings.MANAGE_ALL_FILES_ACCESS_PERMISSION");
         permissionsToRequest.size();
         requestPermissions(permissionsToRequest.toArray(new String[permissionsToRequest.size()]), ALL_PERMISSIONS_RESULT);
 
@@ -161,10 +166,8 @@ public class WalkInActivity extends AppCompatActivity {
             }
         });
 
-        unitView.setOnItemClickListener((adapterView, view, i, l) -> {
-
+        unitView.setOnItemClickListener( (adapterView, view, i, l) -> {
             unitLabel[0] =  String.valueOf(adapterView.getItemAtPosition(i));
-            Log.d("walkin",units.get(i+1).unit_label +" - "+unitLabel[0] +" - " + i);
             Log.d("walkin", unitLabel[0]);
             residentView.getText().clear();
             residentView.setTextColor(Color.BLACK);
@@ -174,7 +177,7 @@ public class WalkInActivity extends AppCompatActivity {
 
             List<UnitListRequest.Unit> filtered = units.stream().filter(o -> o.unit_label.equalsIgnoreCase(unitLabel[0])).collect(Collectors.toList());
             if(filtered.size() > 0){
-                if(filtered.get(0).owners == null){
+                if(filtered.get(0).residents.length == 0){
                    residentView.setText("-- NO OWNER --");
                    residentView.setTextColor(Color.RED);
                    residentView.setTypeface(null, Typeface.BOLD);
@@ -183,18 +186,11 @@ public class WalkInActivity extends AppCompatActivity {
                 else {
                     UnitListRequest.Unit unit = filtered.get(0);
                     unit_id = unit.id;
-                    Log.d("walkin", unit.owners.profile.full_name);
+//                    Log.d("walkin", unit.owners.profile.full_name);
+                    for(UnitListRequest.Residents r: unit.residents){
+                        listmap.put(r.profile_id, r.profile.full_name);
+                    }
 
-                    listmap.put(unit.owners.profile_id, unit.owners.profile.full_name);
-                    for(UnitListRequest.Family f: unit.owners.family){
-                        listmap.put(f.profile_id, f.profile.full_name);
-                    }
-                    for(UnitListRequest.Tenant t: unit.tenants){
-                        listmap.put(t.profile_id, t.profile.full_name);
-                        for(UnitListRequest.Family f: t.family){
-                            listmap.put(f.profile_id, f.profile.full_name);
-                        }
-                    }
                     residentsAdapter.addAll(listmap.values());
                     residentsAdapter.notifyDataSetChanged();
                     residentsAdapter.getFilter().filter(null);
@@ -245,64 +241,78 @@ public class WalkInActivity extends AppCompatActivity {
             WalkInVisitorRequest.Transport transport  = binding.transportGroup.getCheckedRadioButtonId() == binding.walkinRadio.getId() ? WalkInVisitorRequest.Transport.WALK_IN : WalkInVisitorRequest.Transport.VEHICLE;
             long time = new Date().getTime();
             if(!hasError){
-                File f = new File(this.getCacheDir().getAbsolutePath(), "document.png");
-                try {
-                    f.createNewFile();
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    myBitmap.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
-                    byte[] bitmapdata = bos.toByteArray();
 
-//write the bytes in file
-                    FileOutputStream fos = null;
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                try {
+
+                    if (binding.documentView.getVisibility() == View.VISIBLE) {
+                        File f = File.createTempFile("document_" + new Date().getTime(), ".png");
+                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                        myBitmap.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+                        byte[] bitmapdata = bos.toByteArray();
+
+                        //write the bytes in file
+                        FileOutputStream fos = null;
                         fos = new FileOutputStream(f);
 
                         fos.write(bitmapdata);
                         fos.flush();
                         fos.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                        f.deleteOnExit();
 
-                new UploadImage(unit_id, resident_id, f, Ures -> {
-                    String image = null;
-                    if(Ures.success) image = Ures.data.url;
-                    new WalkInVisitorRequest(unit_id, resident_id, nameVal,phoneVal,vnumVal,transport,time, image, res -> {
-                        pd.dismiss();
-                        if(res.success) {
-                            new VisitUpdateRequest(res.data.id, VisitUpdateRequest.Status.ARRIVED, updateRes -> {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                                String alertMsg = "Visitor Record Added";
-                                if(!updateRes.success) alertMsg = "Visitor Registered. Arrival Update failed";
-                                builder.setMessage(alertMsg)
-                                        .setCancelable(false)
-                                        .setPositiveButton("OK", (dialog, id) -> {
-                                            dialog.dismiss();
-                                            finish();
-                                        });
-                                builder.create().show();
-                            }).execute();
-                        }else {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                            builder.setMessage("Visitor Register Failed")
-                                    .setCancelable(false)
-                                    .setPositiveButton("OK", (dialog, id) -> {
-                                        dialog.dismiss();
-                                        finish();
-                                    });
-                            builder.create().show();
-                        }
-                    }).execute();
-                }).execute();
+                        new UploadImage(unit_id, resident_id, f, Ures -> {
+                            String image = null;
+                            if (Ures.success) image = Ures.data.url;
+                            walkInApi(nameVal, phoneVal, vnumVal, transport, time, image, builder, pd);
+                        }).execute();
+                    }else{
+                        walkInApi(nameVal,phoneVal,vnumVal,transport,time, null,builder,pd);
+                    }
+                } catch(IOException e){
+                    builder.setMessage("Visitor Register Failed")
+                            .setCancelable(false)
+                            .setPositiveButton("OK", (dialog, id) -> {
+                                dialog.dismiss();
+                                finish();
+                            });
+                    builder.create().show();
+                }
 
             }
             else {
                 pd.dismiss();
                 Snackbar.make(view,verify(),Snackbar.LENGTH_LONG).show();
             }
-
         });
     }
 
+
+    void walkInApi(String nameVal, String phoneVal, String vnumVal, WalkInVisitorRequest.Transport transport, long time, String image, AlertDialog.Builder builder,ProgressDialog pd){
+        new WalkInVisitorRequest(unit_id, resident_id, nameVal,phoneVal,vnumVal,transport,time, image, res -> {
+            pd.dismiss();
+            if(res.success) {
+                new VisitUpdateRequest(res.data.id, VisitUpdateRequest.Status.ARRIVED, updateRes -> {
+                    String alertMsg = "Visitor Record Added";
+                    if(!updateRes.success) alertMsg = "Visitor Registered. Arrival Update failed";
+                    builder.setMessage(alertMsg)
+                            .setCancelable(false)
+                            .setPositiveButton("OK", (dialog, id) -> {
+                                dialog.dismiss();
+                                finish();
+                            });
+                    builder.create().show();
+                }).execute();
+            }else {
+                builder.setMessage("Visitor Register Failed")
+                        .setCancelable(false)
+                        .setPositiveButton("OK", (dialog, id) -> {
+                            dialog.dismiss();
+                            finish();
+                        });
+                builder.create().show();
+            }
+        }).execute();
+    }
 
     private String verify() {
 

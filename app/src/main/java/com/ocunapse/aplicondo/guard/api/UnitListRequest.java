@@ -37,34 +37,21 @@ public class UnitListRequest extends RequestBase {
         public String site_unit;
         public boolean subletting_allowed;
 
-        public Owner owners;
-        public Tenant[] tenants;
+        public Residents[] residents;
+//        public Tenant[] tenants;
     }
 
-    public class Owner{
+    public class Residents{
         public int id;
         public int profile_id;
         public Profile profile;
-        public Family[] family;
-    }
-    public class Tenant{
-        public int id;
-        public int profile_id;
-        public boolean is_master;
+        public int site_id;
+        public String unit_label;
+        public int user_id;
         public int unit_id;
-        public Family[] family;
-        public Profile profile;
+        public int parent;
+        public String status;
     }
-
-    public static class Family {
-        public int id;
-        public int profile_id;
-        public int unit_id;
-        public int ownersId;
-        public int tenantsId;
-        public Profile profile;
-    }
-
 
     public static class UnitListRes{
         public Boolean success;

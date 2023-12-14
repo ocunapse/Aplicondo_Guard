@@ -20,6 +20,7 @@ import android.os.Vibrator;
 import android.view.View;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
@@ -42,6 +43,10 @@ public class SOSActivity extends AppCompatActivity {
         String name = i.getStringExtra("name");
         String unit = i.getStringExtra("unit");
         String phone = i.getStringExtra("phone");
+
+//        Glide.with(this)
+//                .load(R.raw.sos_1)
+//                .into(binding.imageView);
 
         mPlayer = MediaPlayer.create(this, R.raw.siren_alarm);
         mPlayer.setLooping(true);
