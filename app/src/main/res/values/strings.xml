@@ -54,8 +54,6 @@
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
     <string name="title_activity_splash">SplashActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="scan_qr_desc">Scan a qr code to enable the visitor to check in</string>
     <string name="manually_visitor_details">Manually enter visitor details</string>
     <string name="submit">Submit</string>
@@ -67,4 +65,5 @@
     <string name="confrim_new_password">Confirm New Password</string>
     <string name="change_password">Change Password</string>
     <string name="unit_no">Unit No</string>
+    <string name="sos_notification_title">Unit No</string>
 </resources>

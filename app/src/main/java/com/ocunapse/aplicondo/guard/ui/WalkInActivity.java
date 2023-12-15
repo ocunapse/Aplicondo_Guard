@@ -1,18 +1,14 @@
 package com.ocunapse.aplicondo.guard.ui;
 
-import static android.Manifest.permission_group.CAMERA;
-import static android.Manifest.permission_group.READ_MEDIA_AURAL;
-import static android.os.Environment.getExternalStorageDirectory;
-
-import static com.ocunapse.aplicondo.guard.api.RequestBase.LOG;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.exifinterface.media.ExifInterface;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -20,13 +16,11 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Typeface;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -36,7 +30,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioGroup;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -52,13 +45,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class WalkInActivity extends AppCompatActivity {
@@ -90,9 +81,12 @@ public class WalkInActivity extends AppCompatActivity {
 
         binding = ActivityWalkInBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        ArrayList<UnitListRequest.Unit> units = new ArrayList<UnitListRequest.Unit>();
-        ArrayList<String> unitList = new ArrayList<String>();
+        ArrayList<UnitListRequest.Unit> units = new ArrayList<>();
+        ArrayList<String> unitList = new ArrayList<>();
         HashMap<Integer, String> listmap = new HashMap<>();
+
+        Toolbar tb = binding.toolbar2;
+        tb.setTitle("Walk In Entry");
 
         residentView = binding.residentNameAuto;
         unitView = binding.unitNoAuto;
@@ -103,12 +97,9 @@ public class WalkInActivity extends AppCompatActivity {
         binding.cameraButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.MATCH_PARENT ));
         binding.documentView.setVisibility(View.GONE);
 
-        binding.transportGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                if(i == binding.vehicleRadio.getId())  binding.vehicleInputView.setVisibility(View.VISIBLE);
-                else  binding.vehicleInputView.setVisibility(View.GONE);
-            }
+        binding.transportGroup.setOnCheckedChangeListener((radioGroup, i) -> {
+            if(i == binding.vehicleRadio.getId())  binding.vehicleInputView.setVisibility(View.VISIBLE);
+            else  binding.vehicleInputView.setVisibility(View.GONE);
         });
 
         final String[] unitLabel = new String[1];
@@ -129,14 +120,14 @@ public class WalkInActivity extends AppCompatActivity {
                }
            }
         }).execute();
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>
+        ArrayAdapter<String> adapter = new ArrayAdapter<>
                 (this, android.R.layout.select_dialog_item, unitList);
         //Getting the instance of AutoCompleteTextView
         unitView.setThreshold(2);//will start working from first character
         unitView.setAdapter(adapter);//setting the adapter data into the AutoCompleteTextView
         unitView.setTextColor(Color.BLACK);
 
-        ArrayAdapter<String> residentsAdapter = new ArrayAdapter<String>
+        ArrayAdapter<String> residentsAdapter = new ArrayAdapter<>
                 (WalkInActivity.this, android.R.layout.select_dialog_item, new ArrayList<>(listmap.values()));
         residentsAdapter.setNotifyOnChange(true);
         residentView.setAdapter(residentsAdapter);
@@ -198,7 +189,7 @@ public class WalkInActivity extends AppCompatActivity {
             }
         });
 
-        residentView.setOnFocusChangeListener((View.OnFocusChangeListener) (view, b) -> {
+        residentView.setOnFocusChangeListener((view, b) -> {
             if(b) residentView.showDropDown();
         });
 
@@ -226,10 +217,7 @@ public class WalkInActivity extends AppCompatActivity {
         });
 
 
-        binding.cameraButton.setOnClickListener(view -> {
-
-            startActivityForResult(getPickImageChooserIntent(), 200);
-        });
+        binding.cameraButton.setOnClickListener(view -> startActivityForResult(getPickImageChooserIntent(), 200));
 
         binding.submitWalkin.setOnClickListener(view -> {
             ProgressDialog pd = ProgressDialog.show(this,"",
@@ -252,7 +240,7 @@ public class WalkInActivity extends AppCompatActivity {
                         byte[] bitmapdata = bos.toByteArray();
 
                         //write the bytes in file
-                        FileOutputStream fos = null;
+                        FileOutputStream fos;
                         fos = new FileOutputStream(f);
 
                         fos.write(bitmapdata);
@@ -323,7 +311,7 @@ public class WalkInActivity extends AppCompatActivity {
         if(binding.transportGroup.getCheckedRadioButtonId() == binding.vehicleRadio.getId())
             if(vehicleNum.getText().toString().trim().length() < 2 ) return "Vehicle No not long enough";
         if(reason.getText().toString().trim().length() < 3) return "Reason text not long enough";
-        if(phone.getText().toString().trim().length() < 3) return "Invalid Phone Number";;
+        if(phone.getText().toString().trim().length() < 3) return "Invalid Phone Number";
 
         try {
             Phonenumber.PhoneNumber number = phoneNumberUtil.parse(phone.getText(), "MY");
@@ -378,7 +366,7 @@ public class WalkInActivity extends AppCompatActivity {
         }
 
         // the main intent is the last in the list (fucking android) so pickup the useless one
-        Intent mainIntent = (Intent) allIntents.get(allIntents.size() - 1);
+        Intent mainIntent = allIntents.get(allIntents.size() - 1);
         for (Intent intent : allIntents) {
             if (intent.getComponent().getClassName().equals("com.android.documentsui.DocumentsActivity")) {
                 mainIntent = intent;

@@ -156,7 +156,11 @@ public class EntryFragment extends Fragment {
 
         name.setText(visitor.name);
         phone.setText(visitor.mobile_number);
-        vehicle.setText(visitor.vehicle_registration == null ? "-" : visitor.vehicle_registration);
+        if(visitor.vehicle_registration != null && visitor.vehicle_registration.length() > 0) {
+            vehicle.setText(visitor.vehicle_registration);
+        }else{
+            vehicle.setVisibility(View.GONE);
+        }
         unit.setText(visitor.unit.unit_label);
         resident.setText(visitor.profile.full_name);
         resident_phone.setText(" \uD83D\uDCDE " + visitor.profile.phone_number);

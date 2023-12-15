@@ -41,7 +41,6 @@ public class WalkInVisitorRequest extends RequestBase {
         this.visitDate = start.format(new Date(visit_date));
         this.endDate = end.format(new Date(visit_date));
         this.image_url = image;
-        Log.d("walkin",visit_date + " --- " + this.visitDate +" ---- " +endDate);
         this.res = res;
         this.prefix = String.format(Locale.ENGLISH,"/visitor/%d/%d/createVisit",unit_id,profile_id );
     }
@@ -68,7 +67,7 @@ public class WalkInVisitorRequest extends RequestBase {
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-        LOG("walkin", s);
+        LOG("walkin", String.valueOf(s));
         if(s.length() < 1) {
             WalkInRes rs = new WalkInRes();
             rs.success = false;

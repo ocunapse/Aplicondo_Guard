@@ -2,6 +2,7 @@ package com.ocunapse.aplicondo.guard.api;
 
 import android.util.Log;
 
+import java.util.Date;
 import java.util.Locale;
 
 public class EmergencyListRequest extends RequestBase {
@@ -22,6 +23,7 @@ public class EmergencyListRequest extends RequestBase {
         public int user_id;
         public boolean duplicate;
         public String reason;
+        public Date timestamp;
         public Object reported_id;
         public UnitListRequest.Unit unit;
         public User user;

@@ -4,6 +4,7 @@ import static com.ocunapse.aplicondo.guard.api.RequestBase.LOG;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NavUtils;
 
 import android.app.Activity;
 import android.content.Context;
@@ -44,9 +45,9 @@ public class SOSActivity extends AppCompatActivity {
         String unit = i.getStringExtra("unit");
         String phone = i.getStringExtra("phone");
 
-//        Glide.with(this)
-//                .load(R.raw.sos_1)
-//                .into(binding.imageView);
+        Glide.with(this)
+                .load(R.raw.warning)
+                .into(binding.imageView);
 
         mPlayer = MediaPlayer.create(this, R.raw.siren_alarm);
         mPlayer.setLooping(true);
@@ -92,5 +93,16 @@ public class SOSActivity extends AppCompatActivity {
 
     public void pauseSound(View view) {
         mPlayer.stop();
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent upIntent = NavUtils.getParentActivityIntent(this);
+
+        assert upIntent != null;
+        if (NavUtils.shouldUpRecreateTask(this, upIntent)) {
+            startActivity(upIntent);
+        }
+        super.onBackPressed();
     }
 }

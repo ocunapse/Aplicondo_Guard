@@ -57,6 +57,7 @@ public class ReportActivity extends AppCompatActivity {
         int sos_id = i.getIntExtra("sos_id", -1);
         String unit_name = i.getStringExtra("unit_label");
         String name = i.getStringExtra("name" );
+        String phone = i.getStringExtra("phone" );
         LOG("--report", String.valueOf(sos_id));
         Toolbar tb = binding.reportToolbar;
         if (sos_id > 0) {
@@ -64,6 +65,7 @@ public class ReportActivity extends AppCompatActivity {
             type = ReportRequest.GuardReportType.SOS;
             binding.reportUnitNumEt.setText(unit_name);
             binding.reportNameEt.setText(name);
+            binding.reportPhoneNumEt.setText(phone);
             binding.reportUnitNumEt.setEnabled(false);
             binding.reportNameEt.setEnabled(false);
         } else {

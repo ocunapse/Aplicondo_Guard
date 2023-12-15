@@ -4,14 +4,10 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android.support.design="http://schemas.android.com/tools"
-    android:layout_marginStart="8dp"
-    android:layout_marginTop="16dp"
-    android:layout_marginEnd="8dp"
-    android:layout_marginBottom="16dp"
     android:orientation="vertical"
-    android:padding="8dp"
-    android:paddingTop="16dp"
-    android:paddingBottom="16dp">
+    android:padding="20dp"
+    android:paddingTop="2dp"
+    android:paddingVertical="24dp">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -25,11 +21,11 @@
             android:layout_marginBottom="8dp"
             android:gravity="bottom|center"
             android:text="Visitor"
+            android:layout_marginTop="30dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             android:textColor="@color/black"
             android:textSize="24sp"
             android:textStyle="bold" />
-
         <ImageButton
             android:id="@+id/close_btn_visitor_dialog"
             android:layout_width="wrap_content"
@@ -37,6 +33,7 @@
             android:layout_gravity="end"
             android:background="@android:color/transparent"
             android:src="@android:drawable/ic_menu_close_clear_cancel" />
+
     </FrameLayout>
 
 
@@ -44,6 +41,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:boxStrokeWidth="0dp"
+        android:gravity="center"
+        android:layout_gravity="center"
         app:boxStrokeWidthFocused="0dp"
         android:textColorHint="@color/aplicondo_red"
         app:hintTextColor="@color/aplicondo_red"
@@ -55,6 +54,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:editable="false"
+            android:gravity="center"
+            android:layout_gravity="center"
             android:textColor="@color/black"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -75,6 +76,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:editable="false"
+            android:gravity="center"
+            android:layout_gravity="center"
             android:textColor="@color/black"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -95,6 +98,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:editable="false"
+            android:gravity="center"
+            android:layout_gravity="center"
             android:textColor="@color/black"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -118,6 +123,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:editable="false"
+            android:gravity="center"
+            android:layout_gravity="center"
             android:textColor="@color/black"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -137,6 +144,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:editable="false"
+            android:gravity="center"
+            android:layout_gravity="center"
             android:textColor="@color/black"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -161,6 +170,8 @@
             android:clickable="true"
             android:focusableInTouchMode="false"
             android:focusable="false"
+            android:gravity="center"
+            android:layout_gravity="center"
             android:textColor="@color/positive_dark_green"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -202,6 +213,6 @@
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
             android:textSize="18sp"
-            android:text="Verified" />
+            android:text="Arrived" />
     </LinearLayout>
 </LinearLayout>

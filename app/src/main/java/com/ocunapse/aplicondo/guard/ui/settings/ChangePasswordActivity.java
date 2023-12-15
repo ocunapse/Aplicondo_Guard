@@ -1,15 +1,14 @@
 package com.ocunapse.aplicondo.guard.ui.settings;
 
-import static com.ocunapse.aplicondo.guard.api.RequestBase.LOG;
 import static com.ocunapse.aplicondo.guard.util.GeneralComponent.AlertBox;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.EditText;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.ocunapse.aplicondo.guard.R;
 import com.ocunapse.aplicondo.guard.api.ChangePasswordRequest;
@@ -34,8 +33,9 @@ public class ChangePasswordActivity extends AppCompatActivity {
 
 
         binding.changePwdBtn.setOnClickListener(view -> {
-            String old = Objects.requireNonNull(binding.oldPasswordEdittext.getText()).toString();
-            String newPwd = Objects.requireNonNull(binding.newPasswordEdittext.getText()).toString();
+            String old = Objects.requireNonNull(binding.oldPasswordEdittext.getText()).toString().toLowerCase();
+            String newPwd = Objects.requireNonNull(binding.newPasswordEdittext.getText()).toString().toLowerCase()
+                    ;
 
             new ChangePasswordRequest(old,newPwd,res -> {
                 if(res.success) AlertBox(this,"Password Update Success!",(dialogInterface, i) -> finish());
