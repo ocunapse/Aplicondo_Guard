@@ -40,6 +40,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ReportActivity extends AppCompatActivity {
@@ -56,8 +57,8 @@ public class ReportActivity extends AppCompatActivity {
         Intent i = getIntent();
         int sos_id = i.getIntExtra("sos_id", -1);
         String unit_name = i.getStringExtra("unit_label");
-        String name = i.getStringExtra("name" );
-        String phone = i.getStringExtra("phone" );
+        String name = i.getStringExtra("name");
+        String phone = i.getStringExtra("phone");
         LOG("--report", String.valueOf(sos_id));
         Toolbar tb = binding.reportToolbar;
         if (sos_id > 0) {
@@ -77,48 +78,47 @@ public class ReportActivity extends AppCompatActivity {
         binding.reportCameraButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
 
         binding.submitReport.setOnClickListener(view -> {
-                    if (verify().length() > 0) {
-                        Snackbar.make(view, verify(), Snackbar.LENGTH_LONG).show();
-                        return;
-                    }
+            if (verify().length() > 0) {
+                Snackbar.make(view, verify(), Snackbar.LENGTH_LONG).show();
+                return;
+            }
 
-                    ProgressDialog pd = ProgressDialog.show(this, "Loading...",
-                            "Loading. Please wait...", true);
+            ProgressDialog pd = ProgressDialog.show(this, "Loading...",
+                    "Loading. Please wait...", true);
 
-                    String unit_number = binding.reportUnitNumEt.getText().toString();
-                    String resident_name = binding.reportNameEt.getText().toString();
-                    String contact = binding.reportPhoneNumEt.getText().toString();
-                    String details = binding.reportMsgEt.getText().toString();
-                    ArrayList<File> files = new ArrayList();
-                    for (int j = 0; j < binding.reportDocumentView.getChildCount(); j++) {
-                        ImageView img = (ImageView) binding.reportDocumentView.getChildAt(j);
+            String unit_number = binding.reportUnitNumEt.getText().toString();
+            String resident_name = binding.reportNameEt.getText().toString();
+            String contact = binding.reportPhoneNumEt.getText().toString();
+            String details = binding.reportMsgEt.getText().toString();
+            ArrayList<File> files = new ArrayList();
+            for (int j = 0; j < binding.reportDocumentView.getChildCount(); j++) {
+                ImageView img = (ImageView) binding.reportDocumentView.getChildAt(j);
 
-                        File f = new File(this.getCacheDir().getAbsolutePath(), "document.png");
-                        try {
-                            f.createNewFile();
-                            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                            ((BitmapDrawable)img.getDrawable()).getBitmap().compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
-                            byte[] bitmapdata = bos.toByteArray();
 
-                            //write the bytes in file
-                            FileOutputStream fos = null;
-                            fos = new FileOutputStream(f);
+                try {
+                    File f = File.createTempFile("document_" + new Date().getTime(), ".png");
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    ((BitmapDrawable) img.getDrawable()).getBitmap().compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+                    byte[] bitmapdata = bos.toByteArray();
 
-                            fos.write(bitmapdata);
-                            fos.flush();
-                            fos.close();
-                            files.add(f);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                    if(files.size() >0){
-                        new UploadReportImages(files.toArray(new File[0]), uRes -> {
-                            String[] images = uRes.success? uRes.data.url: null;
-                            report(pd,unit_number,resident_name,contact,details,images,sos_id);
-                        }).execute();
-                    }
-                    else report(pd,unit_number,resident_name,contact,details,null,sos_id);
+                    //write the bytes in file
+                    FileOutputStream fos = null;
+                    fos = new FileOutputStream(f);
+
+                    fos.write(bitmapdata);
+                    fos.flush();
+                    fos.close();
+                    files.add(f);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            if (files.size() > 0) {
+                new UploadReportImages(files.toArray(new File[0]), uRes -> {
+                    String[] images = uRes.success ? uRes.data.url : null;
+                    report(pd, unit_number, resident_name, contact, details, images, sos_id);
+                }).execute();
+            } else report(pd, unit_number, resident_name, contact, details, null, sos_id);
 
         });
 
@@ -130,7 +130,7 @@ public class ReportActivity extends AppCompatActivity {
     }
 
 
-    private void report(ProgressDialog pd, String unit_name, String name, String contact, String details,String[] images,int sos_id){
+    private void report(ProgressDialog pd, String unit_name, String name, String contact, String details, String[] images, int sos_id) {
         if (type == ReportRequest.GuardReportType.SOS) {
             new ReportRequest(type, unit_name, name, contact, details, images, sos_id, res -> {
                 pd.dismiss();
@@ -229,21 +229,20 @@ public class ReportActivity extends AppCompatActivity {
     }
 
 
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Bitmap myBitmap;
 
-        Log.e("ss-d", "onActivityResult: "+ getPickImageResultUri(data));
-        Log.e("ss-d", "onActivityResult: "+ binding.reportDocumentView.getChildAt(0));
+        Log.e("ss-d", "onActivityResult: " + getPickImageResultUri(data));
+        Log.e("ss-d", "onActivityResult: " + binding.reportDocumentView.getChildAt(0));
         if (resultCode == Activity.RESULT_OK && getPickImageResultUri(data) != null) {
 
             ImageView imageView = new ImageView(this);
-            imageView.setPadding(30,20,30,20);
-            imageView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT,1f));
+            imageView.setPadding(30, 20, 30, 20);
+            imageView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT, 1f));
 
-            Log.e("ss-d", "onActivityResult: "+ getCaptureImageOutputUri());
+            Log.e("ss-d", "onActivityResult: " + getCaptureImageOutputUri());
             if (getPickImageResultUri(data) != null) {
                 picUri = getPickImageResultUri(data);
                 try {
@@ -254,10 +253,10 @@ public class ReportActivity extends AppCompatActivity {
                     imageView.setImageBitmap(myBitmap);
                     binding.reportDocumentView.setVisibility(View.VISIBLE);
                     binding.reportDocumentView.addView(imageView);
-                    binding.reportCameraButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.MATCH_PARENT ));
+                    binding.reportCameraButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT));
 
                 } catch (IOException e) {
-                    Log.e("ss-d", "onActivityResult: ",e );
+                    Log.e("ss-d", "onActivityResult: ", e);
                     e.printStackTrace();
                 }
 
@@ -266,13 +265,13 @@ public class ReportActivity extends AppCompatActivity {
 
                 myBitmap = (Bitmap) data.getExtras().get("data");
 
-                Log.e("ss-d", "onActivityResult: "+ myBitmap);
+                Log.e("ss-d", "onActivityResult: " + myBitmap);
                 assert myBitmap != null;
                 myBitmap = getResizedBitmap(myBitmap, 500);
                 imageView.setImageBitmap(myBitmap);
                 binding.reportDocumentView.setVisibility(View.VISIBLE);
                 binding.reportDocumentView.addView(imageView);
-                binding.reportCameraButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.MATCH_PARENT ));
+                binding.reportCameraButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT));
             }
             binding.reportDocumentView.setWeightSum(binding.reportDocumentView.getChildCount());
         }
