@@ -5,6 +5,7 @@ import android.util.Log;
 
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 
 public class VisitorCheckInRequest extends RequestBase {
 
@@ -56,6 +57,7 @@ public class VisitorCheckInRequest extends RequestBase {
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
+        LOG("vresp",s);
         if(s.length() < 1) {
             VisitorRes rs = new VisitorRes();
             rs.success = false;
@@ -67,7 +69,8 @@ public class VisitorCheckInRequest extends RequestBase {
                 VisitorRes rs = g.fromJson(s, VisitorRes.class);
                 res.get(rs);
             }catch (Exception e){
-                Log.e("API error", e.getMessage());
+                Log.e("--scan_val", "onPostExecute: ",e);
+                Log.e("API error", Objects.requireNonNull(e.getMessage()));
                 VisitorRes rs = new VisitorRes();
                 rs.success = false;
                 rs.error = new APIError();

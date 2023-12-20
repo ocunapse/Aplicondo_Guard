@@ -1,6 +1,7 @@
 package com.ocunapse.aplicondo.guard.ui.visitor_entry;
 
 import static com.ocunapse.aplicondo.guard.api.RequestBase.LOG;
+import static com.ocunapse.aplicondo.guard.api.RequestBase.application;
 import static com.ocunapse.aplicondo.guard.util.GeneralComponent.AlertBox;
 import static com.ocunapse.aplicondo.guard.util.StringUtil.hmacWithJava;
 
@@ -226,34 +227,44 @@ public class EntryFragment extends Fragment {
                     VisitorCheckInRequest vci = new VisitorCheckInRequest(visitorId, res -> {
                         if (res.success) {
                             pd.dismiss();
-                            LOG("visitData", res.data.visit_date.toString());
-                            TimeZone malaysianTimeZone = TimeZone.getTimeZone("Asia/Kuala_Lumpur");
-                            SimpleDateFormat Mrg = new SimpleDateFormat("yyyy/MM/dd 00:00:00 z");
-                            SimpleDateFormat Nig = new SimpleDateFormat("yyyy/MM/dd 23:59:59 z");
-                            Mrg.setTimeZone(malaysianTimeZone);
-                            Nig.setTimeZone(malaysianTimeZone);
-                            Date now = new Date();
-                            Date todayMorning = new Date(Mrg.format(now));
-                            Date todayNight = new Date(Nig.format(now));
-                            Date endNight = new Date(Nig.format(res.data.end_date != null ? res.data.end_date : now));
-                            LOG("visitData t-Mrg", todayMorning.toString());
-                            LOG("visitData t-Nig", todayNight.toString());
-                            LOG("visitData E-Nig", endNight.toString());
-                            LOG("visitData - now", now.toString());
-                            LOG("visitData - vdate", String.valueOf(res.data.visit_date));
-                            LOG("visitData - edate", String.valueOf(res.data.end_date));
-                            LOG("visitData - compare", String.valueOf(todayMorning.compareTo(res.data.visit_date)));
-                            if (now.compareTo(endNight) > 0) {
-                                Log.e("visitData", "a day - b4");
-                                AlertBox(getContext(), "Visitor Pass expired : " + viewF.format(res.data.end_date));
-                            } else {
-                                if (res.data.visit_date.compareTo(now) > 0) {
-                                    Log.e("visitData", "a day-AF");
-                                    AlertBox(getContext(), "Visitor Pass Not Valid for today");
+                            if(res.data.unit.site_id == application.getSite()) {
+                                LOG("visitData", res.data.visit_date.toString());
+                                TimeZone malaysianTimeZone = TimeZone.getTimeZone("Asia/Kuala_Lumpur");
+                                SimpleDateFormat Mrg = new SimpleDateFormat("yyyy/MM/dd 00:00:00 Z");
+                                SimpleDateFormat Nig = new SimpleDateFormat("yyyy/MM/dd 23:59:59 Z");
+                                Mrg.setTimeZone(malaysianTimeZone);
+                                Nig.setTimeZone(malaysianTimeZone);
+                                Date now = new Date();
+//                                Date todayMorning = new Date(Mrg.format(now));
+//                                Date todayNight = new Date(Nig.format(now));
+                                LOG("--scan_val", String.valueOf(res.data.end_date));
+                                String vv = Nig.format(res.data.end_date != null ? res.data.end_date : now);
+                                LOG("--scan_val",vv);
+                                Date endNight = new Date(vv);
+//                                LOG("visitData t-Mrg", todayMorning.toString());
+//                                LOG("visitData t-Nig", todayNight.toString());
+                                LOG("visitData E-Nig", endNight.toString());
+                                LOG("visitData - now", now.toString());
+                                LOG("visitData - vdate", String.valueOf(res.data.visit_date));
+                                LOG("visitData - edate", String.valueOf(res.data.end_date));
+//                                LOG("visitData - compare", String.valueOf(todayMorning.compareTo(new Date(res.data.visit_date))));
+                                if (now.compareTo(endNight) > 0) {
+                                    Log.e("visitData", "a day - b4");
+                                    AlertBox(getContext(), "Visitor Pass expired : " + viewF.format(res.data.end_date));
                                 } else {
-                                    Log.e("visitData", "tod - " + endNight);
-                                    VisitorDialog(res.data, this.getActivity(), null);
+                                    if (res.data.visit_date.compareTo(now) > 0) {
+                                        Log.e("visitData", "a day-AF");
+                                        AlertBox(getContext(), "Visitor Pass Not Valid for today");
+                                    } else {
+                                        Log.e("visitData", "tod - " + endNight);
+                                        VisitorDialog(res.data, this.getActivity(), null);
+                                    }
                                 }
+                            }else{
+                                pd.dismiss();
+                                String site_msg = getString(R.string.invalid_site_error);
+                                site_msg = site_msg.replace("[condoName]",res.data.unit.site.name);
+                                AlertBox(getContext(), site_msg);
                             }
                         } else {
                             pd.dismiss();
@@ -273,9 +284,7 @@ public class EntryFragment extends Fragment {
         } catch (Exception e) {
             Log.e("scan_val", Arrays.toString(e.getStackTrace()));
             pd.dismiss();
-//            if(e instanceof ArrayIndexOutOfBoundsException){
             AlertBox(getContext(), R.string.invalid_qr_error);
-//            }
         }
     }
 

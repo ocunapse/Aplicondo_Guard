@@ -7,6 +7,7 @@
     <string name="walk_in_btn">Walk In</string>
     <string name="general_title">Aplicondo</string>
     <string name="invalid_qr_error">Invalid QR code</string>
+    <string name="invalid_site_error">This QR code is Invalid. Its valid at [condoName].</string>
     <string name="expired_qr_error">This pass is expired</string>
     <string name="no_visitor_error">No Visitor pass found. This pass might be delete by the resident.</string>
     <string name="title_settings">Settings</string>

@@ -38,8 +38,8 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         binding.loginButton.setOnClickListener(v -> {
-            String uname = binding.loginUsername.getText().toString();
-            String pwd = md5(binding.loginPassword.getText().toString());
+            String uname = binding.loginUsername.getText().toString().toLowerCase();
+            String pwd = md5(binding.loginPassword.getText().toString()).toLowerCase();
             System.out.println(uname + " " + pwd);
             ProgressDialog dialog = ProgressDialog.show(this, "",
                     "Loading. Please wait...", true);

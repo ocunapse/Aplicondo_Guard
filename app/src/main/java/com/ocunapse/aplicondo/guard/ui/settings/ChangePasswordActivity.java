@@ -33,9 +33,8 @@ public class ChangePasswordActivity extends AppCompatActivity {
 
 
         binding.changePwdBtn.setOnClickListener(view -> {
-            String old = Objects.requireNonNull(binding.oldPasswordEdittext.getText()).toString().toLowerCase();
-            String newPwd = Objects.requireNonNull(binding.newPasswordEdittext.getText()).toString().toLowerCase()
-                    ;
+            String old = Objects.requireNonNull(binding.oldPasswordEdittext.getText()).toString();
+            String newPwd = Objects.requireNonNull(binding.newPasswordEdittext.getText()).toString();
 
             new ChangePasswordRequest(old,newPwd,res -> {
                 if(res.success) AlertBox(this,"Password Update Success!",(dialogInterface, i) -> finish());

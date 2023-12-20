@@ -27,8 +27,9 @@ public class ChangePasswordRequest extends RequestBase {
 
 
     public class ChangePasswordReq {
-        String currentPassword = md5(oldPassword);
-        String password = md5(newPassword);
+
+        public String currentPassword = md5(oldPassword).toLowerCase();
+        public String password = md5(newPassword).toLowerCase();
     }
 
     public static class ChangePasswordRes{
@@ -66,6 +67,8 @@ public class ChangePasswordRequest extends RequestBase {
     protected String doInBackground(Void... voids) {
         String data = g.toJson(new ChangePasswordRequest.ChangePasswordReq());
         String url = server + prefix;
+        LOG("--chpwd",url);
+        LOG("--chpwd",data);
         return Request(data, url , CallType.POST);
     }
 }

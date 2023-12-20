@@ -25,6 +25,12 @@ public class UnitListRequest extends RequestBase {
         public String photo_url;
     }
 
+    public static class Site {
+        public int id;
+        public String name;
+        public String guard_phone;
+    }
+
     public static class Unit {
         public int id ;
         public String unit_label;
@@ -36,9 +42,9 @@ public class UnitListRequest extends RequestBase {
         public int unit_type_id;
         public String site_unit;
         public boolean subletting_allowed;
+        public Site site;
 
         public Residents[] residents;
-//        public Tenant[] tenants;
     }
 
     public class Residents{

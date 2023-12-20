@@ -7,6 +7,8 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.appcompat.app.AppCompatDelegate;
+
 import com.auth0.android.jwt.JWT;
 import com.ocunapse.aplicondo.guard.api.PushTokenUpdateRequest;
 
@@ -31,6 +33,7 @@ public class GuardApp extends Application {
     public void onCreate() {
         super.onCreate();
         sharedPref = getApplicationContext().getSharedPreferences(appDef, Context.MODE_PRIVATE);
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
     }
 
     public void setPushToken(String pushToken) {
