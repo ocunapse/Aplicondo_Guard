@@ -1,5 +1,6 @@
 package com.ocunapse.aplicondo.guard;
 
+import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,6 +40,8 @@ public class HomeActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 1);
         }
         shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS);
+
+        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA},210);
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each

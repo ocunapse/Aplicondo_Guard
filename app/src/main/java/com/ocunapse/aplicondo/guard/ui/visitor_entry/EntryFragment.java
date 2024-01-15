@@ -235,14 +235,12 @@ public class EntryFragment extends Fragment {
                                 Mrg.setTimeZone(malaysianTimeZone);
                                 Nig.setTimeZone(malaysianTimeZone);
                                 Date now = new Date();
-//                                Date todayMorning = new Date(Mrg.format(now));
-//                                Date todayNight = new Date(Nig.format(now));
+
                                 LOG("--scan_val", String.valueOf(res.data.end_date));
                                 String vv = Nig.format(res.data.end_date != null ? res.data.end_date : now);
                                 LOG("--scan_val",vv);
                                 Date endNight = new Date(vv);
-//                                LOG("visitData t-Mrg", todayMorning.toString());
-//                                LOG("visitData t-Nig", todayNight.toString());
+
                                 LOG("visitData E-Nig", endNight.toString());
                                 LOG("visitData - now", now.toString());
                                 LOG("visitData - vdate", String.valueOf(res.data.visit_date));
@@ -256,8 +254,12 @@ public class EntryFragment extends Fragment {
                                         Log.e("visitData", "a day-AF");
                                         AlertBox(getContext(), "Visitor Pass Not Valid for today");
                                     } else {
-                                        Log.e("visitData", "tod - " + endNight);
-                                        VisitorDialog(res.data, this.getActivity(), null);
+                                        if(res.data.status.equals( "PENDING_APPROVAL") || res.data.status.equals("REJECTED")){
+                                            AlertBox(getContext(), "Visitor Pass Not Approved");
+                                        }else {
+                                            Log.e("visitData", "tod - " + endNight);
+                                            VisitorDialog(res.data, this.getActivity(), null);
+                                        }
                                     }
                                 }
                             }else{

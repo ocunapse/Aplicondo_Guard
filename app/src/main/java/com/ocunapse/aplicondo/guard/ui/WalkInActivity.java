@@ -1,6 +1,10 @@
 package com.ocunapse.aplicondo.guard.ui;
 
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -71,9 +75,11 @@ public class WalkInActivity extends AppCompatActivity {
     Uri picUri;
 
 
-    private ArrayList<String> permissionsToRequest= new ArrayList<>();
+    private ArrayList<String> permissionsToRequest = new ArrayList<>();
 
     private final static int ALL_PERMISSIONS_RESULT = 107;
+
+    Bitmap bitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,31 +100,32 @@ public class WalkInActivity extends AppCompatActivity {
         phone = binding.walkinPhoneEdittext;
         vehicleNum = binding.walkinVehicleEdittext;
         reason = binding.walkinReasonEdittext;
-        binding.cameraButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.MATCH_PARENT ));
+        binding.cameraButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         binding.documentView.setVisibility(View.GONE);
 
         binding.transportGroup.setOnCheckedChangeListener((radioGroup, i) -> {
-            if(i == binding.vehicleRadio.getId())  binding.vehicleInputView.setVisibility(View.VISIBLE);
-            else  binding.vehicleInputView.setVisibility(View.GONE);
+            if (i == binding.vehicleRadio.getId())
+                binding.vehicleInputView.setVisibility(View.VISIBLE);
+            else binding.vehicleInputView.setVisibility(View.GONE);
         });
 
         final String[] unitLabel = new String[1];
 
         permissionsToRequest.add("android.permission.CAMERA");
         permissionsToRequest.add("android.permission.READ_MEDIA_IMAGES");
-        permissionsToRequest.add("android.permission.READ_EXTERNAL_STORAGE");
-        permissionsToRequest.add("android.settings.MANAGE_ALL_FILES_ACCESS_PERMISSION");
+//        permissionsToRequest.add("android.permission.READ_EXTERNAL_STORAGE");
+//        permissionsToRequest.add("android.settings.MANAGE_ALL_FILES_ACCESS_PERMISSION");
         permissionsToRequest.size();
         requestPermissions(permissionsToRequest.toArray(new String[permissionsToRequest.size()]), ALL_PERMISSIONS_RESULT);
 
         new UnitListRequest(res -> {
-           if(res.success){
+            if (res.success) {
 //               System.out.println(res.data);
-               for(UnitListRequest.Unit o :res.data){
-                   units.add(o);
-                   unitList.add(o.unit_label.toUpperCase());
-               }
-           }
+                for (UnitListRequest.Unit o : res.data) {
+                    units.add(o);
+                    unitList.add(o.unit_label.toUpperCase());
+                }
+            }
         }).execute();
         ArrayAdapter<String> adapter = new ArrayAdapter<>
                 (this, android.R.layout.select_dialog_item, unitList);
@@ -146,9 +153,9 @@ public class WalkInActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if(unitLabel[0] != null && unitLabel[0].length()>0 && !unitView.getText().toString().equalsIgnoreCase(unitLabel[0])) {
+                if (unitLabel[0] != null && unitLabel[0].length() > 0 && !unitView.getText().toString().equalsIgnoreCase(unitLabel[0])) {
                     listmap.clear();
-                    Log.e("walkin","clear");
+                    Log.e("walkin", "clear");
                     residentView.setText("Invalid Unit");
                     residentView.setTextColor(Color.RED);
                     residentView.setTypeface(null, Typeface.BOLD);
@@ -157,8 +164,8 @@ public class WalkInActivity extends AppCompatActivity {
             }
         });
 
-        unitView.setOnItemClickListener( (adapterView, view, i, l) -> {
-            unitLabel[0] =  String.valueOf(adapterView.getItemAtPosition(i));
+        unitView.setOnItemClickListener((adapterView, view, i, l) -> {
+            unitLabel[0] = String.valueOf(adapterView.getItemAtPosition(i));
             Log.d("walkin", unitLabel[0]);
             residentView.getText().clear();
             residentView.setTextColor(Color.BLACK);
@@ -167,18 +174,17 @@ public class WalkInActivity extends AppCompatActivity {
             residentsAdapter.clear();
 
             List<UnitListRequest.Unit> filtered = units.stream().filter(o -> o.unit_label.equalsIgnoreCase(unitLabel[0])).collect(Collectors.toList());
-            if(filtered.size() > 0){
-                if(filtered.get(0).residents.length == 0){
-                   residentView.setText("-- NO OWNER --");
-                   residentView.setTextColor(Color.RED);
-                   residentView.setTypeface(null, Typeface.BOLD);
-                   residentView.setEnabled(false);
-                }
-                else {
+            if (filtered.size() > 0) {
+                if (filtered.get(0).residents.length == 0) {
+                    residentView.setText("-- NO OWNER --");
+                    residentView.setTextColor(Color.RED);
+                    residentView.setTypeface(null, Typeface.BOLD);
+                    residentView.setEnabled(false);
+                } else {
                     UnitListRequest.Unit unit = filtered.get(0);
                     unit_id = unit.id;
 //                    Log.d("walkin", unit.owners.profile.full_name);
-                    for(UnitListRequest.Residents r: unit.residents){
+                    for (UnitListRequest.Residents r : unit.residents) {
                         listmap.put(r.profile_id, r.profile.full_name);
                     }
 
@@ -190,7 +196,7 @@ public class WalkInActivity extends AppCompatActivity {
         });
 
         residentView.setOnFocusChangeListener((view, b) -> {
-            if(b) residentView.showDropDown();
+            if (b) residentView.showDropDown();
         });
 
         residentView.addTextChangedListener(new TextWatcher() {
@@ -207,9 +213,9 @@ public class WalkInActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 List<Map.Entry<Integer, String>> filtered = listmap.entrySet().stream().filter(o -> o.getValue().equalsIgnoreCase(editable.toString())).collect(Collectors.toList());
-                if(filtered.size() > 0) {
+                if (filtered.size() > 0) {
                     resident_id = filtered.get(0).getKey();
-                }else {
+                } else {
                     resident_id = 0;
                 }
                 Log.d("walkin", String.valueOf(resident_id));
@@ -217,18 +223,41 @@ public class WalkInActivity extends AppCompatActivity {
         });
 
 
-        binding.cameraButton.setOnClickListener(view -> startActivityForResult(getPickImageChooserIntent(), 200));
+        ActivityResultLauncher<Intent> resultLauncher;
+
+        resultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK) {
+                Intent data = result.getData();
+                if (data != null) {
+                    myBitmap = (Bitmap) data.getExtras().get("data");
+//                        myBitmap = rotateImageIfRequired(myBitmap);
+                    myBitmap = getResizedBitmap(myBitmap, 500);
+                    binding.documentView.setImageBitmap(myBitmap);
+                    binding.documentView.setVisibility(View.VISIBLE);
+                    binding.cameraButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT));
+
+                }
+            }
+        });
+
+        binding.cameraButton.setOnClickListener(view -> {
+            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            resultLauncher.launch(cameraIntent);
+        });
+
+
+// Get your image
 
         binding.submitWalkin.setOnClickListener(view -> {
-            ProgressDialog pd = ProgressDialog.show(this,"",
+            ProgressDialog pd = ProgressDialog.show(this, "",
                     "Loading. Please wait...", true);
             boolean hasError = verify().length() > 0;
             String nameVal = name.getText().toString();
             String phoneVal = phone.getText().toString();
             String vnumVal = vehicleNum.getText().toString();
-            WalkInVisitorRequest.Transport transport  = binding.transportGroup.getCheckedRadioButtonId() == binding.walkinRadio.getId() ? WalkInVisitorRequest.Transport.WALK_IN : WalkInVisitorRequest.Transport.VEHICLE;
+            WalkInVisitorRequest.Transport transport = binding.transportGroup.getCheckedRadioButtonId() == binding.walkinRadio.getId() ? WalkInVisitorRequest.Transport.WALK_IN : WalkInVisitorRequest.Transport.VEHICLE;
             long time = new Date().getTime();
-            if(!hasError){
+            if (!hasError) {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 try {
@@ -253,10 +282,10 @@ public class WalkInActivity extends AppCompatActivity {
                             if (Ures.success) image = Ures.data.url;
                             walkInApi(nameVal, phoneVal, vnumVal, transport, time, image, builder, pd);
                         }).execute();
-                    }else{
-                        walkInApi(nameVal,phoneVal,vnumVal,transport,time, null,builder,pd);
+                    } else {
+                        walkInApi(nameVal, phoneVal, vnumVal, transport, time, null, builder, pd);
                     }
-                } catch(IOException e){
+                } catch (IOException e) {
                     builder.setMessage("Visitor Register Failed")
                             .setCancelable(false)
                             .setPositiveButton("OK", (dialog, id) -> {
@@ -266,22 +295,21 @@ public class WalkInActivity extends AppCompatActivity {
                     builder.create().show();
                 }
 
-            }
-            else {
+            } else {
                 pd.dismiss();
-                Snackbar.make(view,verify(),Snackbar.LENGTH_LONG).show();
+                Snackbar.make(view, verify(), Snackbar.LENGTH_LONG).show();
             }
         });
     }
 
 
-    void walkInApi(String nameVal, String phoneVal, String vnumVal, WalkInVisitorRequest.Transport transport, long time, String image, AlertDialog.Builder builder,ProgressDialog pd){
-        new WalkInVisitorRequest(unit_id, resident_id, nameVal,phoneVal,vnumVal,transport,time, image, res -> {
+    void walkInApi(String nameVal, String phoneVal, String vnumVal, WalkInVisitorRequest.Transport transport, long time, String image, AlertDialog.Builder builder, ProgressDialog pd) {
+        new WalkInVisitorRequest(unit_id, resident_id, nameVal, phoneVal, vnumVal, transport, time, image, res -> {
             pd.dismiss();
-            if(res.success) {
+            if (res.success) {
                 new VisitUpdateRequest(res.data.id, VisitUpdateRequest.Status.ARRIVED, updateRes -> {
                     String alertMsg = "Visitor Record Added";
-                    if(!updateRes.success) alertMsg = "Visitor Registered. Arrival Update failed";
+                    if (!updateRes.success) alertMsg = "Visitor Registered. Arrival Update failed";
                     builder.setMessage(alertMsg)
                             .setCancelable(false)
                             .setPositiveButton("OK", (dialog, id) -> {
@@ -290,7 +318,7 @@ public class WalkInActivity extends AppCompatActivity {
                             });
                     builder.create().show();
                 }).execute();
-            }else {
+            } else {
                 builder.setMessage("Visitor Register Failed")
                         .setCancelable(false)
                         .setPositiveButton("OK", (dialog, id) -> {
@@ -304,139 +332,28 @@ public class WalkInActivity extends AppCompatActivity {
 
     private String verify() {
 
-        if(residentView.getText().toString().trim().length() < 2) return "Resident name is not filled";
-        if(unit_id == 0 ) return "Invalid Unit";
-        if(resident_id == 0 ) return "Invalid resident name";
-        if(name.getText().toString().trim().length() < 2) return "Name not long enough";
-        if(binding.transportGroup.getCheckedRadioButtonId() == binding.vehicleRadio.getId())
-            if(vehicleNum.getText().toString().trim().length() < 2 ) return "Vehicle No not long enough";
-        if(reason.getText().toString().trim().length() < 3) return "Reason text not long enough";
-        if(phone.getText().toString().trim().length() < 3) return "Invalid Phone Number";
+        if (residentView.getText().toString().trim().length() < 2)
+            return "Resident name is not filled";
+        if (unit_id == 0) return "Invalid Unit";
+        if (resident_id == 0) return "Invalid resident name";
+        if (name.getText().toString().trim().length() < 2) return "Name not long enough";
+        if (binding.transportGroup.getCheckedRadioButtonId() == binding.vehicleRadio.getId())
+            if (vehicleNum.getText().toString().trim().length() < 2)
+                return "Vehicle No not long enough";
+        if (reason.getText().toString().trim().length() < 3) return "Reason text not long enough";
+        if (phone.getText().toString().trim().length() < 3) return "Invalid Phone Number";
 
         try {
             Phonenumber.PhoneNumber number = phoneNumberUtil.parse(phone.getText(), "MY");
-            if(!phoneNumberUtil.isValidNumber(number)) return "Invalid Phone Number";
-            else phone.setText(phoneNumberUtil.format(number, PhoneNumberUtil.PhoneNumberFormat.E164));
-        }catch (Exception ignored){
+            if (!phoneNumberUtil.isValidNumber(number)) return "Invalid Phone Number";
+            else
+                phone.setText(phoneNumberUtil.format(number, PhoneNumberUtil.PhoneNumberFormat.E164));
+        } catch (Exception ignored) {
             System.out.println(ignored.getMessage());
             return "Invalid Phone Number";
         }
 
         return "";
-    }
-
-
-
-
-    /**
-     * Create a chooser intent to select the source to get image from.<br />
-     * The source can be camera's (ACTION_IMAGE_CAPTURE) or gallery's (ACTION_GET_CONTENT).<br />
-     * All possible sources are added to the intent chooser.
-     */
-    public Intent getPickImageChooserIntent() {
-
-        // Determine Uri of camera image to save.
-        Uri outputFileUri = getCaptureImageOutputUri();
-
-        List<Intent> allIntents = new ArrayList<>();
-        PackageManager packageManager = getPackageManager();
-
-        // collect all camera intents
-        Intent captureIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        List<ResolveInfo> listCam = packageManager.queryIntentActivities(captureIntent, 0);
-        for (ResolveInfo res : listCam) {
-            Intent intent = new Intent(captureIntent);
-            intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
-            intent.setPackage(res.activityInfo.packageName);
-            if (outputFileUri != null) {
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
-            }
-            allIntents.add(intent);
-        }
-
-        // collect all gallery intents
-        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
-        galleryIntent.setType("image/*");
-        List<ResolveInfo> listGallery = packageManager.queryIntentActivities(galleryIntent, 0);
-        for (ResolveInfo res : listGallery) {
-            Intent intent = new Intent(galleryIntent);
-            intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
-            intent.setPackage(res.activityInfo.packageName);
-            allIntents.add(intent);
-        }
-
-        // the main intent is the last in the list (fucking android) so pickup the useless one
-        Intent mainIntent = allIntents.get(allIntents.size() - 1);
-        for (Intent intent : allIntents) {
-            if (intent.getComponent().getClassName().equals("com.android.documentsui.DocumentsActivity")) {
-                mainIntent = intent;
-                break;
-            }
-        }
-        allIntents.remove(mainIntent);
-
-        // Create a chooser from the main intent
-        Intent chooserIntent = Intent.createChooser(mainIntent, "Select source");
-
-        // Add all other intents
-        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, allIntents.toArray(new Parcelable[allIntents.size()]));
-
-        return chooserIntent;
-    }
-
-
-    /**
-     * Get URI to image received from capture by camera.
-     */
-    public static Uri getCaptureImageOutputUri() {
-        Uri outputFileUri = null;
-        File getImage = new File(Environment.getExternalStorageDirectory(), "profile.png");
-        if (getImage != null) {
-            outputFileUri = Uri.fromFile(getImage);
-        }
-        return outputFileUri;
-    }
-
-
-    /**
-     * Get the URI of the selected image from {@link #getPickImageChooserIntent()}.<br />
-     * Will return the correct URI for camera and gallery image.
-     *
-     * @param data the returned data of the activity result
-     */
-    public static Uri getPickImageResultUri(Intent data) {
-        boolean isCamera = true;
-        System.out.println(data);
-        if (data != null) {
-            String action = data.getAction();
-            isCamera = action != null && action.equals(MediaStore.ACTION_IMAGE_CAPTURE);
-        }
-        return isCamera ? getCaptureImageOutputUri() : data.getData();
-    }
-
-    public static Bitmap rotateImageIfRequired(Bitmap img, Uri selectedImage) throws IOException {
-
-        ExifInterface ei = new ExifInterface(selectedImage.getPath());
-        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-
-        switch (orientation) {
-            case ExifInterface.ORIENTATION_ROTATE_90:
-                return rotateImage(img, 90);
-            case ExifInterface.ORIENTATION_ROTATE_180:
-                return rotateImage(img, 180);
-            case ExifInterface.ORIENTATION_ROTATE_270:
-                return rotateImage(img, 270);
-            default:
-                return img;
-        }
-    }
-
-    private static Bitmap rotateImage(Bitmap img, int degree) {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(degree);
-        Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
-        img.recycle();
-        return rotatedImg;
     }
 
     public static Bitmap getResizedBitmap(Bitmap image, int maxSize) {
@@ -452,51 +369,6 @@ public class WalkInActivity extends AppCompatActivity {
             width = (int) (height * bitmapRatio);
         }
         return Bitmap.createScaledBitmap(image, width, height, true);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Bitmap bitmap;
-
-        Log.e("ss-d", "onActivityResult: "+ getPickImageResultUri(data));
-        if (resultCode == Activity.RESULT_OK && getPickImageResultUri(data) != null) {
-
-            ImageView imageView = binding.documentView;
-
-            Log.e("ss-d", "onActivityResult: "+ getCaptureImageOutputUri());
-            if (getPickImageResultUri(data) != null) {
-                picUri = getPickImageResultUri(data);
-                try {
-                    myBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), picUri);
-                    myBitmap = rotateImageIfRequired(myBitmap, picUri);
-                    myBitmap = getResizedBitmap(myBitmap, 500);
-
-                    imageView.setImageBitmap(myBitmap);
-                    binding.documentView.setVisibility(View.VISIBLE);
-                    binding.cameraButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.MATCH_PARENT ));
-
-                } catch (IOException e) {
-                    Log.e("ss-d", "onActivityResult: ",e );
-                    e.printStackTrace();
-                }
-
-
-            } else {
-
-                bitmap = (Bitmap) data.getExtras().get("data");
-
-                myBitmap = bitmap;
-                Log.e("ss-d", "onActivityResult: "+ bitmap);
-                assert myBitmap != null;
-                myBitmap = getResizedBitmap(myBitmap, 500);
-                imageView.setImageBitmap(myBitmap);
-                binding.documentView.setVisibility(View.VISIBLE);
-                binding.cameraButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.MATCH_PARENT ));
-            }
-
-        }
-
     }
 
 }

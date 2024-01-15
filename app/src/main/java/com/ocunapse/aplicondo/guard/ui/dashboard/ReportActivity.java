@@ -1,11 +1,10 @@
 package com.ocunapse.aplicondo.guard.ui.dashboard;
 
 import static com.ocunapse.aplicondo.guard.api.RequestBase.LOG;
-import static com.ocunapse.aplicondo.guard.ui.WalkInActivity.getCaptureImageOutputUri;
-import static com.ocunapse.aplicondo.guard.ui.WalkInActivity.getPickImageResultUri;
 import static com.ocunapse.aplicondo.guard.ui.WalkInActivity.getResizedBitmap;
-import static com.ocunapse.aplicondo.guard.ui.WalkInActivity.rotateImageIfRequired;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -122,9 +121,27 @@ public class ReportActivity extends AppCompatActivity {
 
         });
 
+        ActivityResultLauncher<Intent> resultLauncher;
+
+        resultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK) {
+                Intent data = result.getData();
+                if (data != null) {
+                    ImageView imv = new ImageView(this);
+                    Bitmap myBitmap = (Bitmap) data.getExtras().get("data");
+                    myBitmap = getResizedBitmap(myBitmap, 500);
+                    imv.setImageBitmap(myBitmap);
+                    binding.reportDocumentView.setVisibility(View.VISIBLE);
+                    binding.reportDocumentView.addView(imv);
+                    binding.reportCameraButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT));
+                }
+            }
+        });
+
 
         binding.reportCameraButton.setOnClickListener(view -> {
-            startActivityForResult(getPickImageChooserIntent(), 200);
+            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            resultLauncher.launch(cameraIntent);
         });
 
     }
@@ -174,109 +191,6 @@ public class ReportActivity extends AppCompatActivity {
         }
 
         return "";
-    }
-
-
-    public Intent getPickImageChooserIntent() {
-
-        // Determine Uri of camera image to save.
-        Uri outputFileUri = getCaptureImageOutputUri();
-
-        List<Intent> allIntents = new ArrayList<>();
-        PackageManager packageManager = getPackageManager();
-
-        // collect all camera intents
-        Intent captureIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        List<ResolveInfo> listCam = packageManager.queryIntentActivities(captureIntent, 0);
-        for (ResolveInfo res : listCam) {
-            Intent intent = new Intent(captureIntent);
-            intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
-            intent.setPackage(res.activityInfo.packageName);
-            if (outputFileUri != null) {
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
-            }
-            allIntents.add(intent);
-        }
-
-        // collect all gallery intents
-        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
-        galleryIntent.setType("image/*");
-        List<ResolveInfo> listGallery = packageManager.queryIntentActivities(galleryIntent, 0);
-        for (ResolveInfo res : listGallery) {
-            Intent intent = new Intent(galleryIntent);
-            intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
-            intent.setPackage(res.activityInfo.packageName);
-            allIntents.add(intent);
-        }
-
-        // the main intent is the last in the list (fucking android) so pickup the useless one
-        Intent mainIntent = (Intent) allIntents.get(allIntents.size() - 1);
-        for (Intent intent : allIntents) {
-            if (intent.getComponent().getClassName().equals("com.android.documentsui.DocumentsActivity")) {
-                mainIntent = intent;
-                break;
-            }
-        }
-        allIntents.remove(mainIntent);
-
-        // Create a chooser from the main intent
-        Intent chooserIntent = Intent.createChooser(mainIntent, "Select source");
-
-        // Add all other intents
-        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, allIntents.toArray(new Parcelable[allIntents.size()]));
-
-        return chooserIntent;
-    }
-
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Bitmap myBitmap;
-
-        Log.e("ss-d", "onActivityResult: " + getPickImageResultUri(data));
-        Log.e("ss-d", "onActivityResult: " + binding.reportDocumentView.getChildAt(0));
-        if (resultCode == Activity.RESULT_OK && getPickImageResultUri(data) != null) {
-
-            ImageView imageView = new ImageView(this);
-            imageView.setPadding(30, 20, 30, 20);
-            imageView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT, 1f));
-
-            Log.e("ss-d", "onActivityResult: " + getCaptureImageOutputUri());
-            if (getPickImageResultUri(data) != null) {
-                picUri = getPickImageResultUri(data);
-                try {
-                    myBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), picUri);
-                    myBitmap = rotateImageIfRequired(myBitmap, picUri);
-                    myBitmap = getResizedBitmap(myBitmap, 500);
-
-                    imageView.setImageBitmap(myBitmap);
-                    binding.reportDocumentView.setVisibility(View.VISIBLE);
-                    binding.reportDocumentView.addView(imageView);
-                    binding.reportCameraButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT));
-
-                } catch (IOException e) {
-                    Log.e("ss-d", "onActivityResult: ", e);
-                    e.printStackTrace();
-                }
-
-
-            } else {
-
-                myBitmap = (Bitmap) data.getExtras().get("data");
-
-                Log.e("ss-d", "onActivityResult: " + myBitmap);
-                assert myBitmap != null;
-                myBitmap = getResizedBitmap(myBitmap, 500);
-                imageView.setImageBitmap(myBitmap);
-                binding.reportDocumentView.setVisibility(View.VISIBLE);
-                binding.reportDocumentView.addView(imageView);
-                binding.reportCameraButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT));
-            }
-            binding.reportDocumentView.setWeightSum(binding.reportDocumentView.getChildCount());
-        }
-
-
     }
 
 }
